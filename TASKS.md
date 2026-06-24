@@ -8,9 +8,9 @@
 - `[-]` Skipped / deferred
 
 ## Progress Summary
-> Last updated: 2026-06-19
-> Phase 1: 32/34 | Phase 2: 32/32 | Phase 3: 0/19 | Phase 4: 0/20 | Phase 5: 0/20
-> **Total: 64 / 133 tasks done**
+> Last updated: 2026-06-23
+> Phase 1: 32/34 | Phase 2: 32/32 | Phase 3: 19/19 | Phase 4: 0/20 | Phase 5: 0/20
+> **Total: 83 / 133 tasks done**
 
 ---
 
@@ -111,31 +111,31 @@
 ## Phase 3 — Liabilities & Protection
 
 ### P3.1 · Bonds
-- [ ] `T-067` Migration `010_create_bonds.sql` — `bond_holdings`, `bond_coupon_payments`
-- [ ] `T-068` CRUD API for Bonds (corporate, G-Sec, tax-free, NCD)
-- [ ] `T-069` YTM calculation service
-- [ ] `T-070` Frontend: Bonds list with YTM, coupon schedule
+- [x] `T-067` Migration `010_create_bonds.sql` — `bond_holdings`, `bond_coupon_payments`
+- [x] `T-068` CRUD API for Bonds (corporate, G-Sec, tax-free, NCD)
+- [x] `T-069` YTM calculation service
+- [x] `T-070` Frontend: Bonds list with YTM, coupon schedule
 
 ### P3.2 · Insurance
-- [ ] `T-071` Migration `011_create_insurance.sql` — `insurance_policies`, `insurance_premium_payments`
-- [ ] `T-072` CRUD API for Insurance (all types) + premium payment log
-- [ ] `T-073` Nominees sub-resource: `GET/POST /assets/insurance/:id/nominees`
-- [ ] `T-074` Frontend: Insurance list with coverage summary cards
-- [ ] `T-075` Frontend: `InsuranceForm.jsx` — conditional fields per insurance type
+- [x] `T-071` Migration `011_create_insurance.sql` — `insurance_policies`, `insurance_premium_payments`
+- [x] `T-072` CRUD API for Insurance (all types) + premium payment log
+- [x] `T-073` Nominees sub-resource: `GET/POST /assets/insurance/:id/nominees`
+- [x] `T-074` Frontend: Insurance list with coverage summary cards
+- [x] `T-075` Frontend: `InsuranceForm.jsx` — conditional fields per insurance type
 
 ### P3.3 · Real Estate
-- [ ] `T-076` Migration `012_create_real_estate.sql` — `properties`
-- [ ] `T-077` CRUD API for Properties (with rental income tracking)
-- [ ] `T-078` Frontend: Real Estate list with rental yield calculation
+- [x] `T-076` Migration `012_create_real_estate.sql` — `properties`
+- [x] `T-077` CRUD API for Properties (with rental income tracking)
+- [x] `T-078` Frontend: Real Estate list with rental yield calculation
 
 ### P3.4 · Loans
-- [ ] `T-079` Migration `013_create_loans.sql` — `loans`, `loan_transactions`
-- [ ] `T-080` CRUD API for all loan types
-- [ ] `T-081` EMI amortization schedule generator (`finance/emi.js`)
-- [ ] `T-082` `GET /api/v1/assets/loans/:id/amortization` — full schedule
-- [ ] `T-083` `GET /api/v1/assets/loans/:id/prepayment-simulator?amount=X` — savings calc
-- [ ] `T-084` Frontend: Loans list with outstanding, EMI calendar
-- [ ] `T-085` Frontend: `LoanForm.jsx` + prepayment simulator modal
+- [x] `T-079` Migration `013_create_loans.sql` — `loans`, `loan_transactions`
+- [x] `T-080` CRUD API for all loan types
+- [x] `T-081` EMI amortization schedule generator (`finance/emi.js`)
+- [x] `T-082` `GET /api/v1/assets/loans/:id/amortization` — full schedule
+- [x] `T-083` `GET /api/v1/assets/loans/:id/prepayment-simulator?amount=X` — savings calc
+- [x] `T-084` Frontend: Loans list with outstanding, EMI calendar
+- [x] `T-085` Frontend: `LoanForm.jsx` + prepayment simulator modal
 
 ---
 

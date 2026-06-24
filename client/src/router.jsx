@@ -9,6 +9,10 @@ import MutualFunds from '@/pages/MutualFunds'
 import Stocks from '@/pages/Stocks'
 import Gold from '@/pages/Gold'
 import GovtSchemes from '@/pages/GovtSchemes'
+import Loans from '@/pages/Loans'
+import Bonds from '@/pages/Bonds'
+import Insurance from '@/pages/Insurance'
+import RealEstate from '@/pages/RealEstate'
 import PlaceholderPage from '@/pages/PlaceholderPage'
 
 const router = createBrowserRouter([
@@ -28,11 +32,11 @@ const router = createBrowserRouter([
       { path: 'assets/mutual-funds', element: <MutualFunds /> },
       { path: 'assets/stocks', element: <Stocks /> },
       { path: 'assets/gold', element: <Gold /> },
-      { path: 'assets/bonds', element: <PlaceholderPage title="Bonds" /> },
+      { path: 'assets/bonds', element: <Bonds /> },
       { path: 'assets/govt-schemes', element: <GovtSchemes /> },
-      { path: 'assets/insurance', element: <PlaceholderPage title="Insurance" /> },
-      { path: 'assets/real-estate', element: <PlaceholderPage title="Real Estate" /> },
-      { path: 'assets/loans', element: <PlaceholderPage title="Loans" /> },
+      { path: 'assets/insurance', element: <Insurance /> },
+      { path: 'assets/real-estate', element: <RealEstate /> },
+      { path: 'assets/loans', element: <Loans /> },
       { path: 'assets/alternatives', element: <PlaceholderPage title="Alternatives" /> },
       { path: 'goals', element: <PlaceholderPage title="Goals" /> },
       { path: 'tax', element: <PlaceholderPage title="Tax" /> },

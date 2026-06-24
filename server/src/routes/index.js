@@ -6,5 +6,9 @@ module.exports = async function routes(fastify) {
   fastify.register(require('./assets/stocks.routes'), { prefix: '/assets' })
   fastify.register(require('./assets/gold.routes'), { prefix: '/assets' })
   fastify.register(require('./assets/govtSchemes.routes'), { prefix: '/assets' })
+  fastify.register(require('./assets/loans.routes'), { prefix: '/assets' })
+  fastify.register(require('./assets/bonds.routes'), { prefix: '/assets' })
+  fastify.register(require('./assets/insurance.routes'), { prefix: '/assets' })
+  fastify.register(require('./assets/realEstate.routes'), { prefix: '/assets' })
   fastify.register(require('./market.routes'), { prefix: '/market' })
 }

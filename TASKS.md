@@ -8,9 +8,9 @@
 - `[-]` Skipped / deferred
 
 ## Progress Summary
-> Last updated: 2026-06-23
-> Phase 1: 32/34 | Phase 2: 32/32 | Phase 3: 19/19 | Phase 4: 0/20 | Phase 5: 0/20
-> **Total: 83 / 133 tasks done**
+> Last updated: 2026-06-25
+> Phase 1: 32/34 | Phase 2: 32/32 | Phase 3: 19/19 | Phase 4: 4/20 | Phase 5: 0/20
+> **Total: 87 / 133 tasks done**
 
 ---
 
@@ -151,10 +151,10 @@
 - [ ] `T-092` Frontend: Tax page — deductions tracker, capital gains table, harvest alerts
 
 ### P4.2 · Goals
-- [ ] `T-093` Migration `014_create_goals.sql` — `goals`, `goal_assets`
-- [ ] `T-094` CRUD API for Goals + link/unlink assets
-- [ ] `T-095` Goal projection service — SIP required, timeline, achievement probability
-- [ ] `T-096` Frontend: Goals page with progress cards and projection chart
+- [x] `T-093` Migration `014_create_goals.sql` — `goals`, `goal_assets`
+- [x] `T-094` CRUD API for Goals + link/unlink assets
+- [x] `T-095` Goal projection service — SIP required, timeline, achievement probability
+- [x] `T-096` Frontend: Goals page with progress cards and projection chart
 
 ### P4.3 · Alerts & Notifications
 - [ ] `T-097` Migration `015_create_alerts.sql` — `alert_configs`, `notifications`

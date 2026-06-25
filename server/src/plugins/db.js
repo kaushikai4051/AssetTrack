@@ -12,6 +12,7 @@ async function dbPlugin(fastify) {
     waitForConnections: true,
     connectionLimit: 10,
     timezone: '+05:30',
+    dateStrings: ['DATE'],
   })
 
   try {

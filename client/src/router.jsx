@@ -13,6 +13,7 @@ import Loans from '@/pages/Loans'
 import Bonds from '@/pages/Bonds'
 import Insurance from '@/pages/Insurance'
 import RealEstate from '@/pages/RealEstate'
+import Goals from '@/pages/Goals'
 import PlaceholderPage from '@/pages/PlaceholderPage'
 
 const router = createBrowserRouter([
@@ -38,7 +39,7 @@ const router = createBrowserRouter([
       { path: 'assets/real-estate', element: <RealEstate /> },
       { path: 'assets/loans', element: <Loans /> },
       { path: 'assets/alternatives', element: <PlaceholderPage title="Alternatives" /> },
-      { path: 'goals', element: <PlaceholderPage title="Goals" /> },
+      { path: 'goals', element: <Goals /> },
       { path: 'tax', element: <PlaceholderPage title="Tax" /> },
       { path: 'reports', element: <PlaceholderPage title="Reports" /> },
       { path: 'family', element: <PlaceholderPage title="Family" /> },

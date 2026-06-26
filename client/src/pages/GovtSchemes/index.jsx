@@ -1,11 +1,12 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Plus, Trash2, PlusCircle, Pencil, History } from 'lucide-react'
+import { Plus, Trash2, PlusCircle, Pencil, History, Upload } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import PageWrapper from '@/components/layout/PageWrapper'
 import Modal from '@/components/shared/Modal'
+import ImportWizard from '@/components/shared/ImportWizard'
 import GovtSchemeForm from './GovtSchemeForm'
 import GovtSchemeTransactionForm from './GovtSchemeTransactionForm'
 import { formatINR, formatCompact, formatReturn } from '@/utils/currency'
@@ -383,13 +384,27 @@ export default function GovtSchemes() {
             <p className="text-muted-foreground text-sm">
               No {currentTab?.label} holdings added yet.
             </p>
-            <Button size="sm" onClick={() => setModal({ type: 'add' })}>
-              <Plus size={14} className="mr-1" />Add {currentTab?.label}
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button size="sm" onClick={() => setModal({ type: 'add' })}>
+                <Plus size={14} className="mr-1" />Add {currentTab?.label}
+              </Button>
+              {activeTab === 'ppf' && (
+                <Button size="sm" variant="outline" onClick={() => setModal({ type: 'import' })}>
+                  <Upload size={13} className="mr-1" />Import CSV
+                </Button>
+              )}
+            </div>
           </CardContent>
         </Card>
       ) : (
         <div className="space-y-2">
+          {activeTab === 'ppf' && (
+            <div className="flex justify-end">
+              <Button size="sm" variant="outline" onClick={() => setModal({ type: 'import' })}>
+                <Upload size={13} className="mr-1" />Import PPF from CSV
+              </Button>
+            </div>
+          )}
           {tabData.map((h) => (
             <HoldingCard key={h.asset_id} h={h}
               onEdit={(holding) => setModal({ type: 'edit', holding })}
@@ -400,6 +415,18 @@ export default function GovtSchemes() {
         </div>
       )}
 
+      {modal?.type === 'import' && (
+        <Modal title="Import PPF Accounts from CSV" onClose={() => setModal(null)}>
+          <ImportWizard
+            type="ppf"
+            onDone={() => {
+              setModal(null)
+              qc.invalidateQueries({ queryKey: ['govt-schemes'] })
+              qc.invalidateQueries({ queryKey: ['dashboard', 'summary'] })
+            }}
+          />
+        </Modal>
+      )}
       {modal?.type === 'add' && (
         <Modal title="Add Govt Scheme" onClose={() => setModal(null)}>
           <GovtSchemeForm onClose={() => setModal(null)} />

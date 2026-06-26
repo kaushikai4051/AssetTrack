@@ -1,0 +1,5 @@
+scheme_name,scheme_code,isin,fund_house,category,plan_type,folio_number,tx_date,tx_type,source,units,nav,amount,notes
+Axis Bluechip Fund Direct Growth,120503,INF846K01DP8,Axis Mutual Fund,Equity,growth,12345678,2023-01-10,purchase,sip,50.5234,98.72,5000,SIP Jan 2023
+Axis Bluechip Fund Direct Growth,120503,INF846K01DP8,Axis Mutual Fund,Equity,growth,12345678,2023-02-10,purchase,sip,48.2109,103.71,5000,SIP Feb 2023
+Axis Bluechip Fund Direct Growth,120503,INF846K01DP8,Axis Mutual Fund,Equity,growth,12345678,2024-01-15,redemption,lumpsum,25.0000,145.30,3632.50,Partial redemption
+Mirae Asset Large Cap Fund,118825,INF769K01EE5,Mirae Asset,Equity,growth,98765432,2023-03-15,purchase,lumpsum,245.0000,204.35,50000,Lumpsum investment

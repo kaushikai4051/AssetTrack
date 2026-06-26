@@ -1,0 +1,6 @@
+account_number,institution,start_date,interest_rate,nominee,tx_date,tx_type,amount,description
+PPF-SBI-123456,SBI Main Branch,2015-04-01,7.10,Jane Doe,2022-04-05,deposit,50000,FY 2022-23 contribution
+PPF-SBI-123456,SBI Main Branch,2015-04-01,7.10,Jane Doe,2023-03-31,interest,26500,Interest credited FY 2022-23
+PPF-SBI-123456,SBI Main Branch,2015-04-01,7.10,Jane Doe,2023-04-03,deposit,50000,FY 2023-24 contribution
+PPF-POST-654321,Post Office,2018-07-01,7.10,,2022-07-01,deposit,30000,Annual deposit
+PPF-POST-654321,Post Office,2018-07-01,7.10,,2023-03-31,interest,18200,Interest FY 2022-23

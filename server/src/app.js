@@ -8,6 +8,9 @@ const fastify = require('fastify')({
 const config = require('./config')
 
 // Core plugins
+fastify.register(require('@fastify/multipart'), {
+  limits: { fileSize: 5 * 1024 * 1024, files: 1 }, // 5 MB max
+})
 fastify.register(require('@fastify/cookie'))
 fastify.register(require('@fastify/cors'), {
   origin: config.clientUrl,

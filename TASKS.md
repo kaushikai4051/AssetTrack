@@ -8,9 +8,9 @@
 - `[-]` Skipped / deferred
 
 ## Progress Summary
-> Last updated: 2026-06-25
-> Phase 1: 32/34 | Phase 2: 32/32 | Phase 3: 19/19 | Phase 4: 4/20 | Phase 5: 0/20
-> **Total: 87 / 133 tasks done**
+> Last updated: 2026-06-26
+> Phase 1: 32/34 | Phase 2: 32/32 | Phase 3: 19/19 | Phase 4: 4/20 | Phase 5: 0/20 | Phase 6: 8/8
+> **Total: 95 / 141 tasks done**
 
 ---
 
@@ -202,6 +202,29 @@
 - [ ] `T-123` CRUD API for Chit Fund, P2P, Angel investments
 - [ ] `T-124` Crypto price fetch service (CoinGecko)
 - [ ] `T-125` Frontend: Alternatives page
+
+---
+
+---
+
+## Phase 6 — CSV Data Import
+
+> Allows users to migrate existing data from spreadsheets or other finance apps via downloadable CSV templates.
+> Covers FD, PPF, and Mutual Funds in v1. Alternate approaches: CAS PDF (T-117), broker P&L CSV (T-118), JSON bulk API (power users).
+
+### P6.1 · Backend — Parser & Template Endpoints
+- [x] `T-134` Install `csv-parse`; create `server/src/utils/csvParser.js` — streaming parser with header normalization, type coercion (dates → ISO, numbers → float), and row-level error collection
+- [x] `T-135` Create `server/src/routes/imports.js` plugin; register as `/api/v1/imports`; add `GET /api/v1/imports/templates/:type` to serve downloadable CSV templates (`fd`, `ppf`, `mutual-fund`) with correct headers pre-filled
+
+### P6.2 · Backend — Asset-Specific Import Handlers
+- [x] `T-136` `POST /api/v1/imports/fd` — parse FD CSV, validate required fields (bank_name, principal, interest_rate, start_date, maturity_date), bulk insert rows into `assets` + `fixed_deposits`, return `{ imported, failed: [{ row, reason }] }`
+- [x] `T-137` `POST /api/v1/imports/ppf` — parse PPF CSV (flat format, one row per transaction grouped by account_number), insert one record into `govt_scheme_holdings` (scheme_type = 'ppf') and N rows into `govt_scheme_transactions`, recalculate current balance
+- [x] `T-138` `POST /api/v1/imports/mutual-fund` — parse MF CSV (fund metadata + transaction rows grouped by scheme_code/folio), upsert `mutual_funds` record, insert `mutual_fund_transactions`, trigger units/avg_cost recalculation; return row-level result
+
+### P6.3 · Frontend — Import Wizard
+- [x] `T-139` `ImportWizard.jsx` — reusable 3-step wizard component: **Step 1** Download template + file upload (drag-and-drop); **Step 2** Confirm with file details and import button; **Step 3** Result summary (N imported, M failed) with expandable failure list
+- [x] `T-140` Wire "Import CSV" button into FD list page, PPF tab on Govt Schemes page, and Mutual Funds list page — each opens `ImportWizard` with the correct `type` prop
+- [x] `T-141` Template reference accordion on Step 1 of the wizard — shows column names, required/optional badges, and accepted values for each asset type
 
 ---
 

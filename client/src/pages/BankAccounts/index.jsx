@@ -1,11 +1,12 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Plus, Pencil, Trash2 } from 'lucide-react'
+import { Plus, Pencil, Trash2, Upload } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import PageWrapper from '@/components/layout/PageWrapper'
 import Modal from '@/components/shared/Modal'
+import ImportWizard from '@/components/shared/ImportWizard'
 import FDForm from './FDForm'
 import RDForm from './RDForm'
 import SavingsForm from './SavingsForm'
@@ -60,7 +61,7 @@ function DeleteButton({ onConfirm }) {
 
 function FDTab() {
   const qc = useQueryClient()
-  const [modal, setModal] = useState(null) // null | { mode: 'add' | 'edit', data? }
+  const [modal, setModal] = useState(null) // null | { mode: 'add' | 'edit' | 'import', data? }
 
   const { data = [], isLoading } = useQuery({
     queryKey: ['fixed-deposits'],
@@ -83,14 +84,26 @@ function FDTab() {
   return (
     <>
       {!data.length ? (
-        <EmptyState label="Fixed Deposits" onAdd={() => setModal({ mode: 'add' })} />
+        <div className="space-y-3">
+          <EmptyState label="Fixed Deposits" onAdd={() => setModal({ mode: 'add' })} />
+          <div className="text-center">
+            <Button size="sm" variant="outline" onClick={() => setModal({ mode: 'import' })}>
+              <Upload size={13} className="mr-1" />Import from CSV
+            </Button>
+          </div>
+        </div>
       ) : (
         <>
           <div className="flex items-center justify-between mb-4">
             <div className="text-sm text-muted-foreground">
               {data.length} FD{data.length !== 1 ? 's' : ''} · Principal {formatCompact(totalPrincipal)} · Maturity {formatCompact(total)}
             </div>
-            <Button size="sm" onClick={() => setModal({ mode: 'add' })}><Plus size={14} className="mr-1" />Add FD</Button>
+            <div className="flex items-center gap-2">
+              <Button size="sm" variant="outline" onClick={() => setModal({ mode: 'import' })}>
+                <Upload size={13} className="mr-1" />Import CSV
+              </Button>
+              <Button size="sm" onClick={() => setModal({ mode: 'add' })}><Plus size={14} className="mr-1" />Add FD</Button>
+            </div>
           </div>
 
           <div className="space-y-2">
@@ -129,7 +142,19 @@ function FDTab() {
         </>
       )}
 
-      {modal && (
+      {modal?.mode === 'import' && (
+        <Modal title="Import Fixed Deposits from CSV" onClose={() => setModal(null)}>
+          <ImportWizard
+            type="fd"
+            onDone={() => {
+              setModal(null)
+              qc.invalidateQueries({ queryKey: ['fixed-deposits'] })
+              qc.invalidateQueries({ queryKey: ['dashboard', 'summary'] })
+            }}
+          />
+        </Modal>
+      )}
+      {modal && modal.mode !== 'import' && (
         <Modal
           title={modal.mode === 'add' ? 'Add Fixed Deposit' : 'Edit Fixed Deposit'}
           onClose={() => setModal(null)}

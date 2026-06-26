@@ -1,0 +1,3 @@
+bank_name,account_number,principal,interest_rate,compounding,start_date,maturity_date,is_auto_renew,nominee_name,notes
+SBI,SB-XXXX-1234,100000,7.00,quarterly,2023-01-15,2025-01-15,no,John Doe,FY 2023 FD
+HDFC Bank,,50000,6.75,monthly,2024-06-01,2025-06-01,yes,,

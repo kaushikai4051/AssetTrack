@@ -1,11 +1,12 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Plus, Trash2, RefreshCw, PlusCircle, History } from 'lucide-react'
+import { Plus, Trash2, RefreshCw, PlusCircle, History, Upload } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import PageWrapper from '@/components/layout/PageWrapper'
 import Modal from '@/components/shared/Modal'
+import ImportWizard from '@/components/shared/ImportWizard'
 import MutualFundForm from './MutualFundForm'
 import TransactionForm from './TransactionForm'
 import { formatINR, formatCompact, formatReturn } from '@/utils/currency'
@@ -201,9 +202,14 @@ export default function MutualFunds() {
       title="Mutual Funds"
       description="SIP and lumpsum investments with XIRR tracking"
       actions={
-        <Button size="sm" onClick={() => setModal({ type: 'add-fund' })}>
-          <Plus size={14} className="mr-1" />Add Fund
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button size="sm" variant="outline" onClick={() => setModal({ type: 'import' })}>
+            <Upload size={13} className="mr-1" />Import CSV
+          </Button>
+          <Button size="sm" onClick={() => setModal({ type: 'add-fund' })}>
+            <Plus size={14} className="mr-1" />Add Fund
+          </Button>
+        </div>
       }
     >
       {/* Summary strip */}
@@ -231,9 +237,14 @@ export default function MutualFunds() {
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12 gap-3 text-center">
             <p className="text-muted-foreground text-sm">No mutual funds added yet.</p>
-            <Button size="sm" onClick={() => setModal({ type: 'add-fund' })}>
-              <Plus size={14} className="mr-1" />Add Fund
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button size="sm" onClick={() => setModal({ type: 'add-fund' })}>
+                <Plus size={14} className="mr-1" />Add Fund
+              </Button>
+              <Button size="sm" variant="outline" onClick={() => setModal({ type: 'import' })}>
+                <Upload size={13} className="mr-1" />Import CSV
+              </Button>
+            </div>
           </CardContent>
         </Card>
       ) : (
@@ -309,6 +320,18 @@ export default function MutualFunds() {
       )}
 
       {/* Modals */}
+      {modal?.type === 'import' && (
+        <Modal title="Import Mutual Funds from CSV" onClose={() => setModal(null)}>
+          <ImportWizard
+            type="mutual-fund"
+            onDone={() => {
+              setModal(null)
+              qc.invalidateQueries({ queryKey: ['mutual-funds'] })
+              qc.invalidateQueries({ queryKey: ['dashboard', 'summary'] })
+            }}
+          />
+        </Modal>
+      )}
       {modal?.type === 'add-fund' && (
         <Modal title="Add Mutual Fund" onClose={() => setModal(null)}>
           <MutualFundForm onClose={() => setModal(null)} />

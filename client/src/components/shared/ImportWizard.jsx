@@ -160,11 +160,22 @@ function StepUpload({ type, config, onFileReady }) {
     handleFile(e.dataTransfer.files[0])
   }, [handleFile])
 
-  const handleDownloadTemplate = () => {
-    const a = document.createElement('a')
-    // Use window.location to build the full API URL via Vite proxy
-    a.href = `/api/v1/imports/templates/${config.templateType}`
-    a.click()
+  const handleDownloadTemplate = async () => {
+    try {
+      const res = await api.get(`/imports/templates/${config.templateType}`, {
+        responseType: 'blob',
+      })
+      const url = URL.createObjectURL(new Blob([res.data], { type: 'text/csv' }))
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `${config.templateType}_import_template.csv`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+    } catch {
+      alert('Failed to download template. Please try again.')
+    }
   }
 
   return (

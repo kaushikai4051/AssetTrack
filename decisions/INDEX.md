@@ -11,3 +11,4 @@ Each file records one architectural or technical decision — what was chosen, w
 | [ADR-005](ADR-005_finance-calculations.md) | Finance Calculations on Server Side | Accepted | 2026-06-18 |
 | [ADR-006](ADR-006_asset-current-value-caching.md) | Asset Current Value Caching Strategy | Accepted | 2026-06-18 |
 | [ADR-007](ADR-007_price-data-sources.md) | Market Price Data Sources (Free APIs) | Accepted | 2026-06-18 |
+| [ADR-008](ADR-008_mysql-to-postgres-migration-plan.md) | MySQL → PostgreSQL Migration Plan | Planned | 2026-06-26 |

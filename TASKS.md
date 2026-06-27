@@ -8,9 +8,9 @@
 - `[-]` Skipped / deferred
 
 ## Progress Summary
-> Last updated: 2026-06-26
-> Phase 1: 32/34 | Phase 2: 32/32 | Phase 3: 19/19 | Phase 4: 4/20 | Phase 5: 0/20 | Phase 6: 8/8
-> **Total: 95 / 141 tasks done**
+> Last updated: 2026-06-27
+> Phase 1: 32/34 | Phase 2: 32/32 | Phase 3: 19/19 | Phase 4: 11/20 | Phase 5: 0/20 | Phase 6: 8/8
+> **Total: 102 / 141 tasks done**
 
 ---
 
@@ -142,13 +142,13 @@
 ## Phase 4 — Intelligence Layer
 
 ### P4.1 · Tax Module
-- [ ] `T-086` Capital gains tax service (`tax/capitalGainsTax.js`) — all asset types, indexation
-- [ ] `T-087` Deductions aggregator (`tax/deductions.js`) — 80C basket running total
-- [ ] `T-088` `GET /api/v1/tax/summary?fy=` — combined tax dashboard data
-- [ ] `T-089` `GET /api/v1/tax/capital-gains?fy=` — per-asset LTCG/STCG breakdown
-- [ ] `T-090` `GET /api/v1/tax/deductions?fy=` — 80C, 80D, 24b, 80CCD(1B) status
-- [ ] `T-091` `GET /api/v1/tax/harvesting-suggestions` — unrealized losses > unrealized gains
-- [ ] `T-092` Frontend: Tax page — deductions tracker, capital gains table, harvest alerts
+- [x] `T-086` Capital gains tax service (`tax/capitalGainsTax.js`) — all asset types, indexation
+- [x] `T-087` Deductions aggregator (`tax/deductions.js`) — 80C basket running total
+- [x] `T-088` `GET /api/v1/tax/summary?fy=` — combined tax dashboard data
+- [x] `T-089` `GET /api/v1/tax/capital-gains?fy=` — per-asset LTCG/STCG breakdown
+- [x] `T-090` `GET /api/v1/tax/deductions?fy=` — 80C, 80D, 24b, 80CCD(1B) status
+- [x] `T-091` `GET /api/v1/tax/harvesting-suggestions` — unrealized losses > unrealized gains
+- [x] `T-092` Frontend: Tax page — deductions tracker, capital gains table, harvest alerts
 
 ### P4.2 · Goals
 - [x] `T-093` Migration `014_create_goals.sql` — `goals`, `goal_assets`

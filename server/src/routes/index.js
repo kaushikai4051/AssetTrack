@@ -16,4 +16,5 @@ module.exports = async function routes(fastify) {
   fastify.register(require('./tax.routes'), { prefix: '/tax' })
   fastify.register(require('./analytics.routes'), { prefix: '/analytics' })
   fastify.register(require('./alerts.routes'), { prefix: '/alerts' })
+  fastify.register(require('./reports.routes'), { prefix: '/reports' })
 }

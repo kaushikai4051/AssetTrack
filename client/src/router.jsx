@@ -16,6 +16,7 @@ import RealEstate from '@/pages/RealEstate'
 import Goals from '@/pages/Goals'
 import Tax from '@/pages/Tax'
 import Analytics from '@/pages/Analytics'
+import Alerts from '@/pages/Alerts'
 import PlaceholderPage from '@/pages/PlaceholderPage'
 
 const router = createBrowserRouter([
@@ -46,7 +47,7 @@ const router = createBrowserRouter([
       { path: 'analytics', element: <Analytics /> },
       { path: 'reports', element: <PlaceholderPage title="Reports" /> },
       { path: 'family', element: <PlaceholderPage title="Family" /> },
-      { path: 'alerts', element: <PlaceholderPage title="Alerts" /> },
+      { path: 'alerts', element: <Alerts /> },
       { path: 'settings', element: <PlaceholderPage title="Settings" /> },
     ],
   },

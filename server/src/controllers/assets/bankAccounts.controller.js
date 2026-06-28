@@ -42,9 +42,12 @@ async function fdList(request, reply) {
 async function fdCreate(request, reply) {
   const db = request.server.db
   const { bank_name, account_number, principal, interest_rate, compounding,
-          start_date, maturity_date, is_auto_renew, nominee_name, notes, family_member_id } = request.body
+          start_date, maturity_date, is_auto_renew, nominee_name, notes, family_member_id,
+          maturity_amount: clientMaturityAmount } = request.body
 
-  const maturity_amount = calcFDMaturity(principal, interest_rate, compounding, start_date, maturity_date)
+  const maturity_amount = clientMaturityAmount != null
+    ? parseFloat(clientMaturityAmount)
+    : calcFDMaturity(principal, interest_rate, compounding, start_date, maturity_date)
   const asset_name = `FD — ${bank_name}`
 
   const conn = await db.getConnection()
@@ -103,12 +106,15 @@ async function fdUpdate(request, reply) {
   const db = request.server.db
   const { id } = request.params
   const { bank_name, account_number, principal, interest_rate, compounding,
-          start_date, maturity_date, is_auto_renew, nominee_name, notes, family_member_id } = request.body
+          start_date, maturity_date, is_auto_renew, nominee_name, notes, family_member_id,
+          maturity_amount: clientMaturityAmount } = request.body
 
   const existing = await queryOne(db, 'SELECT id FROM assets WHERE id = ? AND user_id = ? AND is_active = 1', [id, request.user.id])
   if (!existing) return reply.code(404).send({ message: 'Fixed deposit not found' })
 
-  const maturity_amount = calcFDMaturity(principal, interest_rate, compounding, start_date, maturity_date)
+  const maturity_amount = clientMaturityAmount != null
+    ? parseFloat(clientMaturityAmount)
+    : calcFDMaturity(principal, interest_rate, compounding, start_date, maturity_date)
   const asset_name = `FD — ${bank_name}`
 
   const conn = await db.getConnection()

@@ -19,6 +19,7 @@ import Analytics from '@/pages/Analytics'
 import Alerts from '@/pages/Alerts'
 import Reports from '@/pages/Reports'
 import Settings from '@/pages/Settings'
+import Nominees from '@/pages/Nominees'
 import PlaceholderPage from '@/pages/PlaceholderPage'
 
 const router = createBrowserRouter([
@@ -49,6 +50,7 @@ const router = createBrowserRouter([
       { path: 'analytics', element: <Analytics /> },
       { path: 'reports', element: <Reports /> },
       { path: 'family', element: <PlaceholderPage title="Family" /> },
+      { path: 'nominees', element: <Nominees /> },
       { path: 'alerts', element: <Alerts /> },
       { path: 'settings', element: <Settings /> },
     ],

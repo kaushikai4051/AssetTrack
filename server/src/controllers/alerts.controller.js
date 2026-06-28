@@ -42,7 +42,7 @@ async function all(request, reply) {
 
   const alerts = []
 
-  const [fds, rds, govtSchemes, bonds, sgb, insurance, loans, goals, ppf, ssy] =
+  const [fds, rds, govtSchemes, bonds, sgb, insurance, loans, goals, ppf, ssy, expiringDocs] =
     await Promise.all([
 
       // 1. FD maturities
@@ -132,6 +132,14 @@ async function all(request, reply) {
         `SELECT a.asset_name FROM govt_scheme_holdings gsh JOIN assets a ON a.id = gsh.asset_id
          WHERE a.user_id = ? AND a.is_active = 1 AND gsh.scheme_type = 'ssy'`,
         [userId]
+      ).catch(() => []),
+
+      // 11. Documents expiring soon
+      query(db,
+        `SELECT file_name, expires_at FROM documents
+         WHERE user_id = ? AND expires_at IS NOT NULL AND expires_at BETWEEN ? AND ?
+         ORDER BY expires_at`,
+        [userId, todayStr, cutoffStr]
       ).catch(() => []),
     ])
 
@@ -309,6 +317,19 @@ async function all(request, reply) {
       })
     })
   }
+
+  expiringDocs.forEach((r) => {
+    const d = daysBetween(today, r.expires_at)
+    alerts.push({
+      id: `doc-${r.file_name}-${fmtDate(r.expires_at)}`,
+      category: 'document',
+      title: `Document Expiring — ${r.file_name}`,
+      detail: null,
+      date: fmtDate(r.expires_at),
+      daysLeft: d,
+      priority: priority(d),
+    })
+  })
 
   // Sort: urgent first, then by date
   const ORDER = { urgent: 0, warning: 1, info: 2 }

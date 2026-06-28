@@ -1,14 +1,22 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Plus, Pencil, Trash2, ShieldCheck } from 'lucide-react'
+import { Plus, Pencil, Trash2, ShieldCheck, Paperclip } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import PageWrapper from '@/components/layout/PageWrapper'
 import Modal from '@/components/shared/Modal'
 import InsuranceForm from './InsuranceForm'
+import DocumentsPanel from '@/components/shared/DocumentsPanel'
 import { formatINR, formatCompact } from '@/utils/currency'
 import api from '@/services/api'
+
+const INS_ASSET_TYPE = {
+  term: 'life_insurance', endowment: 'life_insurance', money_back: 'life_insurance',
+  ulip: 'life_insurance', lic: 'life_insurance',
+  health: 'health_insurance', critical_illness: 'health_insurance',
+  vehicle: 'vehicle_insurance',
+}
 
 const TABS = [
   { key: 'all',             label: 'All' },
@@ -80,6 +88,7 @@ export default function Insurance() {
   const qc = useQueryClient()
   const [activeType, setActiveType] = useState('all')
   const [modal, setModal] = useState(null)
+  const [docsModal, setDocsModal] = useState(null)
 
   const { data = [], isLoading } = useQuery({
     queryKey: ['insurance', activeType],
@@ -193,6 +202,11 @@ export default function Insurance() {
 
                   <div className="flex items-center gap-1 shrink-0">
                     <Button size="icon" variant="ghost" className="h-7 w-7 text-muted-foreground"
+                      title="Documents"
+                      onClick={() => setDocsModal(policy)}>
+                      <Paperclip size={13} />
+                    </Button>
+                    <Button size="icon" variant="ghost" className="h-7 w-7 text-muted-foreground"
                       onClick={() => setModal({ mode: 'edit', data: policy })}>
                       <Pencil size={13} />
                     </Button>
@@ -208,6 +222,12 @@ export default function Insurance() {
       {modal && (
         <Modal title={modal.mode === 'add' ? 'Add Insurance Policy' : 'Edit Policy'} onClose={() => setModal(null)}>
           <InsuranceForm initialData={modal.data} onClose={() => setModal(null)} />
+        </Modal>
+      )}
+
+      {docsModal && (
+        <Modal title={`Documents — ${docsModal.insurer}`} onClose={() => setDocsModal(null)}>
+          <DocumentsPanel assetType={INS_ASSET_TYPE[docsModal.insurance_type] || 'life_insurance'} assetId={docsModal.id} />
         </Modal>
       )}
     </PageWrapper>

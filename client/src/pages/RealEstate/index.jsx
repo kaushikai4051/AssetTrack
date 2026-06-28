@@ -1,12 +1,13 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Plus, Pencil, Trash2, Home } from 'lucide-react'
+import { Plus, Pencil, Trash2, Home, Paperclip } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import PageWrapper from '@/components/layout/PageWrapper'
 import Modal from '@/components/shared/Modal'
 import PropertyForm from './PropertyForm'
+import DocumentsPanel from '@/components/shared/DocumentsPanel'
 import { formatINR, formatCompact } from '@/utils/currency'
 import api from '@/services/api'
 
@@ -74,6 +75,7 @@ export default function RealEstate() {
   const qc = useQueryClient()
   const [activeType, setActiveType] = useState('all')
   const [modal, setModal] = useState(null)
+  const [docsModal, setDocsModal] = useState(null)
 
   const { data = [], isLoading } = useQuery({
     queryKey: ['real-estate', activeType],
@@ -181,6 +183,11 @@ export default function RealEstate() {
 
                   <div className="flex items-center gap-1 shrink-0">
                     <Button size="icon" variant="ghost" className="h-7 w-7 text-muted-foreground"
+                      title="Documents"
+                      onClick={() => setDocsModal(prop)}>
+                      <Paperclip size={13} />
+                    </Button>
+                    <Button size="icon" variant="ghost" className="h-7 w-7 text-muted-foreground"
                       onClick={() => setModal({ mode: 'edit', data: prop })}>
                       <Pencil size={13} />
                     </Button>
@@ -196,6 +203,12 @@ export default function RealEstate() {
       {modal && (
         <Modal title={modal.mode === 'add' ? 'Add Property' : 'Edit Property'} onClose={() => setModal(null)}>
           <PropertyForm initialData={modal.data} onClose={() => setModal(null)} />
+        </Modal>
+      )}
+
+      {docsModal && (
+        <Modal title={`Documents — ${docsModal.property_name}`} onClose={() => setDocsModal(null)}>
+          <DocumentsPanel assetType={docsModal.property_type === 'reit' ? 'reit' : 'property'} assetId={docsModal.id} />
         </Modal>
       )}
     </PageWrapper>

@@ -8,9 +8,10 @@
 - `[-]` Skipped / deferred
 
 ## Progress Summary
-> Last updated: 2026-06-27
-> Phase 1: 32/34 | Phase 2: 32/32 | Phase 3: 19/19 | Phase 4: 11/20 | Phase 5: 0/20 | Phase 6: 8/8
-> **Total: 102 / 141 tasks done**
+> Last updated: 2026-06-28
+> Phase 1: 32/34 | Phase 2: 32/32 | Phase 3: 19/19 | Phase 4: 14/20 | Phase 5: 4/20 | Phase 6: 8/8
+> Phase 7: 7/7 | Phase 8: 9/9 | Phase 9: 9/9 | Phase 10+11: 6/6 | Phase 12: 6/6
+> **Total: 146 / 179 tasks done**
 
 ---
 
@@ -156,15 +157,15 @@
 - [x] `T-095` Goal projection service — SIP required, timeline, achievement probability
 - [x] `T-096` Frontend: Goals page with progress cards and projection chart
 
-### P4.3 · Alerts & Notifications
-- [ ] `T-097` Migration `015_create_alerts.sql` — `alert_configs`, `notifications`
-- [ ] `T-098` Alert engine service (`notifications/alertEngine.js`) — check all event types
-- [ ] `T-099` Daily cron job (`jobs/alertCheck.job.js`) — fire alert engine at 8 AM
-- [ ] `T-100` `GET /api/v1/notifications` — unread list for header bell icon
-- [ ] `T-101` Frontend: Notifications panel + alert config settings page
+### P4.3 · Alerts & Notifications (superseded by Phase 8)
+- [-] `T-097` Migration `015_create_alerts.sql` — not needed; alerts computed on-the-fly in Phase 8
+- [x] `T-098` Alert engine service — implemented as `alerts.controller.js` in Phase 8
+- [-] `T-099` Daily cron job for alert push — deferred; Phase 8 uses pull model
+- [x] `T-100` `GET /api/v1/alerts/all` — unread list for header bell icon
+- [x] `T-101` Frontend: Alerts page — categorized alert list (maturity, renewal, EMI, tax)
 
 ### P4.4 · Documents
-- [ ] `T-102` Migration `016_create_documents.sql` — `documents` table
+- [ ] `T-102` Migration `016_create_documents.sql` — `documents` table (asset_type, asset_id, file_path, file_name, mime_type, expires_at)
 - [ ] `T-103` `POST /api/v1/documents` — multipart upload, store file, save metadata
 - [ ] `T-104` `GET /api/v1/documents/:id/download` — serve file with auth check
 - [ ] `T-105` Frontend: Document attachment UI on each asset detail page
@@ -173,12 +174,12 @@
 
 ## Phase 5 — Polish & Power Features
 
-### P5.1 · Reports
-- [ ] `T-106` Net worth report (JSON + PDF) — monthly/quarterly/annual
-- [ ] `T-107` Capital gains report (PDF / CSV) — ITR-ready format
-- [ ] `T-108` Income report: dividends + interest + rent aggregated
-- [ ] `T-109` Insurance coverage summary report
-- [ ] `T-110` Frontend: Reports page with download buttons
+### P5.1 · Reports (superseded by Phase 9)
+- [x] `T-106` Net worth snapshot report — implemented as `GET /api/v1/reports/net-worth`
+- [ ] `T-107` Capital gains report (PDF / CSV) — ITR-ready format (still pending)
+- [x] `T-108` Income report: dividends + interest aggregated — `GET /api/v1/reports/interest-income`
+- [x] `T-109` Insurance coverage summary report — `GET /api/v1/reports/insurance`
+- [x] `T-110` Frontend: Reports page with net worth, income, insurance, loan sections + CSV/print
 
 ### P5.2 · Family / Multi-Profile
 - [ ] `T-111` Family member CRUD API + frontend management page
@@ -205,26 +206,130 @@
 
 ---
 
----
-
 ## Phase 6 — CSV Data Import
 
 > Allows users to migrate existing data from spreadsheets or other finance apps via downloadable CSV templates.
-> Covers FD, PPF, and Mutual Funds in v1. Alternate approaches: CAS PDF (T-117), broker P&L CSV (T-118), JSON bulk API (power users).
+> Covers FD, PPF, and Mutual Funds in v1.
 
 ### P6.1 · Backend — Parser & Template Endpoints
 - [x] `T-134` Install `csv-parse`; create `server/src/utils/csvParser.js` — streaming parser with header normalization, type coercion (dates → ISO, numbers → float), and row-level error collection
 - [x] `T-135` Create `server/src/routes/imports.js` plugin; register as `/api/v1/imports`; add `GET /api/v1/imports/templates/:type` to serve downloadable CSV templates (`fd`, `ppf`, `mutual-fund`) with correct headers pre-filled
 
 ### P6.2 · Backend — Asset-Specific Import Handlers
-- [x] `T-136` `POST /api/v1/imports/fd` — parse FD CSV, validate required fields (bank_name, principal, interest_rate, start_date, maturity_date), bulk insert rows into `assets` + `fixed_deposits`, return `{ imported, failed: [{ row, reason }] }`
-- [x] `T-137` `POST /api/v1/imports/ppf` — parse PPF CSV (flat format, one row per transaction grouped by account_number), insert one record into `govt_scheme_holdings` (scheme_type = 'ppf') and N rows into `govt_scheme_transactions`, recalculate current balance
-- [x] `T-138` `POST /api/v1/imports/mutual-fund` — parse MF CSV (fund metadata + transaction rows grouped by scheme_code/folio), upsert `mutual_funds` record, insert `mutual_fund_transactions`, trigger units/avg_cost recalculation; return row-level result
+- [x] `T-136` `POST /api/v1/imports/fd` — parse FD CSV, validate required fields, bulk insert into `assets` + `fixed_deposits`, return `{ imported, failed: [{ row, reason }] }`
+- [x] `T-137` `POST /api/v1/imports/ppf` — parse PPF CSV, insert into `govt_scheme_holdings` + `govt_scheme_transactions`, recalculate current balance
+- [x] `T-138` `POST /api/v1/imports/mutual-fund` — parse MF CSV, upsert `mutual_funds`, insert `mutual_fund_transactions`, trigger recalculation
 
 ### P6.3 · Frontend — Import Wizard
-- [x] `T-139` `ImportWizard.jsx` — reusable 3-step wizard component: **Step 1** Download template + file upload (drag-and-drop); **Step 2** Confirm with file details and import button; **Step 3** Result summary (N imported, M failed) with expandable failure list
-- [x] `T-140` Wire "Import CSV" button into FD list page, PPF tab on Govt Schemes page, and Mutual Funds list page — each opens `ImportWizard` with the correct `type` prop
-- [x] `T-141` Template reference accordion on Step 1 of the wizard — shows column names, required/optional badges, and accepted values for each asset type
+- [x] `T-139` `ImportWizard.jsx` — reusable 3-step wizard: Step 1 download template + upload; Step 2 confirm; Step 3 result summary with expandable failures
+- [x] `T-140` Wire "Import CSV" into FD list, PPF tab, and Mutual Funds list pages
+- [x] `T-141` Template reference accordion on Step 1 — column names, required/optional badges, accepted values
+
+---
+
+## Phase 7 — Portfolio Analytics
+
+### P7.1 · Backend
+- [x] `T-142` `analytics.controller.js` — aggregate all asset types: total invested, current value, absolute return, XIRR, allocation by category
+- [x] `T-143` `GET /api/v1/analytics/overview` — single endpoint returning full analytics payload
+- [x] `T-144` `analytics.routes.js` registered under `/api/v1/analytics`
+
+### P7.2 · Frontend
+- [x] `T-145` Analytics page — asset allocation donut/pie chart by category
+- [x] `T-146` Analytics — returns table: category-wise invested, current value, return %, XIRR
+- [x] `T-147` Analytics — liquidity breakdown (liquid / semi-liquid / illiquid)
+- [x] `T-148` Analytics — top gainers / losers section
+
+---
+
+## Phase 8 — Alerts & Notifications
+
+### P8.1 · Backend
+- [x] `T-149` `alerts.controller.js` — compute alerts across all asset types without a DB table
+- [x] `T-150` FD / RD / bond / govt scheme maturity alerts (configurable look-ahead window)
+- [x] `T-151` Insurance premium renewal alerts (upcoming due dates)
+- [x] `T-152` Loan EMI due date alerts
+- [x] `T-153` PPF / SSY annual contribution deadline alerts (before March 31)
+- [x] `T-154` SGB early exit window alerts (5th year anniversary)
+- [x] `T-155` Tax-saving limit approaching alerts (80C, 80D)
+- [x] `T-156` `GET /api/v1/alerts/all` — returns categorized alerts list
+- [x] `T-157` `alerts.routes.js` registered under `/api/v1/alerts`
+
+### P8.2 · Frontend
+- [x] `T-158` Alerts page — categorized tabs (maturity, renewal, EMI, tax, goals)
+
+> Note: T-158 renumbered from original Phase 9 slot — Alerts page counts as one task.
+
+---
+
+## Phase 9 — Reports
+
+### P9.1 · Backend
+- [x] `T-159` `reports.controller.js` — `netWorthSnapshot`: assets vs liabilities by category
+- [x] `T-160` `reports.controller.js` — `interestIncome`: FD interest + MF dividends + bond coupons aggregated by FY
+- [x] `T-161` `reports.controller.js` — `insuranceSummary`: all policies with premium, sum insured, renewal
+- [x] `T-162` `reports.controller.js` — `loanStatement`: outstanding, EMI paid, interest paid per loan
+- [x] `T-163` `reports.routes.js` — 4 GET endpoints registered under `/api/v1/reports`
+
+### P9.2 · Frontend
+- [x] `T-164` Reports page — net worth snapshot section with category breakdown table
+- [x] `T-165` Reports page — interest & income section
+- [x] `T-166` Reports page — insurance summary section
+- [x] `T-167` Reports page — loan statement section
+- [x] `T-168` Print / PDF export and CSV download for all report sections
+- [x] `T-169` Report header with user info, generated date, and app logo (print + CSV)
+
+---
+
+## Phase 10 — Settings & Appearance
+
+### P10.1 · Backend
+- [x] `T-170` `GET /api/v1/auth/profile` — fetch user profile (name, PAN, DOB, risk profile)
+- [x] `T-171` `PATCH /api/v1/auth/profile` — update profile fields
+- [x] `T-172` `PATCH /api/v1/auth/change-password` — verify old password, set new (bcrypt)
+- [x] `T-173` `GET/PATCH /api/v1/auth/appearance` — per-user theme preference (light / dark / system)
+
+### P10.2 · Frontend
+- [x] `T-174` Settings page — Profile tab: name, PAN, DOB, risk profile questionnaire
+- [x] `T-175` Settings page — Security tab: change password form with show/hide toggle
+- [x] `T-176` Settings page — Appearance tab: theme toggle (light / dark / system)
+- [x] `T-177` `uiStore` (Zustand) — persist theme preference, apply `dark` class to `<html>` root
+- [x] `T-178` Full-app theme coverage — all pages respect dark/light via Tailwind `dark:` classes
+
+---
+
+## Phase 11 — Nominees Management
+
+### P11.1 · Backend
+- [x] `T-179` Migration `015_create_nominees.sql` — `nominees` table (asset_type, asset_id, name, relationship, share_pct, contact)
+- [x] `T-180` `GET /api/v1/nominees` — list all nominees grouped by asset with coverage %
+- [x] `T-181` `POST /api/v1/nominees` — add nominee to an asset
+- [x] `T-182` `PUT /api/v1/nominees/:id` — update nominee details
+- [x] `T-183` `DELETE /api/v1/nominees/:id` — remove nominee
+
+### P11.2 · Frontend
+- [x] `T-184` Nominees page — coverage health check card (% of assets with nominees)
+- [x] `T-185` Nominees page — asset-wise nominee list with expand/collapse
+- [x] `T-186` Add / edit / delete nominee inline form per asset
+
+---
+
+## Phase 12 — Documents & Records *(next)*
+
+### P12.1 · Backend
+- [ ] `T-187` Migration `016_create_documents.sql` — `documents` (id, user_id, asset_type, asset_id, file_name, file_path, mime_type, size_bytes, expires_at, created_at)
+- [ ] `T-188` Multer/fastify-multipart setup — store uploads in `uploads/` with UUID filename; enforce 10 MB limit and allowed MIME types (PDF, JPG, PNG)
+- [ ] `T-189` `POST /api/v1/documents` — upload file, save metadata, return document record
+- [ ] `T-190` `GET /api/v1/documents?asset_type=&asset_id=` — list documents for an asset
+- [ ] `T-191` `GET /api/v1/documents/:id/download` — stream file with auth check (owner only)
+- [ ] `T-192` `DELETE /api/v1/documents/:id` — delete file from disk + DB record
+- [ ] `T-193` Document expiry alert — add to `alerts.controller.js` (insurance policy docs expiring within 30 days)
+
+### P12.2 · Frontend
+- [ ] `T-194` `DocumentsPanel.jsx` — reusable component: file list + upload button + delete; used on every asset detail/form
+- [ ] `T-195` Wire `DocumentsPanel` into FD, Insurance, Real Estate, and Loan detail views
+- [ ] `T-196` Documents page (`/documents`) — global view of all uploaded documents with filter by asset type + expiry date sort
+- [ ] `T-197` Upload progress indicator + file type / size validation on the frontend
 
 ---
 

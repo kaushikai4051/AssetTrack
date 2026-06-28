@@ -1,5 +1,6 @@
 const { query, queryOne, insert } = require('../../models/db')
 const { xirr } = require('../../finance/xirr')
+const { familyFilter } = require('../../utils/familyFilter')
 
 // ── helpers ──────────────────────────────────────────────────────────────────
 
@@ -67,6 +68,7 @@ function computeXirr(txRows, unitsHeld, lastNav) {
 async function list(request, reply) {
   const db = request.server.db
   const userId = request.user.id
+  const ff = familyFilter(request)
 
   const funds = await query(db,
     `SELECT mf.id, mf.scheme_name, mf.scheme_code, mf.isin, mf.fund_house, mf.category,
@@ -75,9 +77,9 @@ async function list(request, reply) {
             a.id AS asset_id, a.current_value, a.invested_amount
      FROM mutual_funds mf
      JOIN assets a ON a.id = mf.asset_id
-     WHERE a.user_id = ? AND a.is_active = 1
+     WHERE a.user_id = ? AND a.is_active = 1${ff.sql}
      ORDER BY a.current_value DESC`,
-    [userId]
+    [userId, ...ff.params]
   )
   if (!funds.length) return []
 

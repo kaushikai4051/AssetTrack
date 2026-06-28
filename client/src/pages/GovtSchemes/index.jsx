@@ -10,6 +10,7 @@ import ImportWizard from '@/components/shared/ImportWizard'
 import GovtSchemeForm from './GovtSchemeForm'
 import GovtSchemeTransactionForm from './GovtSchemeTransactionForm'
 import { formatINR, formatCompact, formatReturn } from '@/utils/currency'
+import useFilterStore from '@/store/filterStore'
 import api from '@/services/api'
 
 const SCHEME_NAMES = {
@@ -301,10 +302,12 @@ export default function GovtSchemes() {
   const qc = useQueryClient()
   const [modal, setModal]   = useState(null)
   const [activeTab, setActiveTab] = useState('ppf')
+  const activeMemberId = useFilterStore((s) => s.activeMemberId)
+  const fmParam = activeMemberId === null ? '' : `?family_member_id=${activeMemberId === 0 ? 'self' : activeMemberId}`
 
   const { data = [], isLoading } = useQuery({
-    queryKey: ['govt-schemes'],
-    queryFn: () => api.get('/assets/govt-schemes').then((r) => r.data),
+    queryKey: ['govt-schemes', activeMemberId],
+    queryFn: () => api.get(`/assets/govt-schemes${fmParam}`).then((r) => r.data),
   })
 
   const deleteMutation = useMutation({

@@ -1,4 +1,5 @@
 const { query, insert } = require('../../models/db')
+const { familyFilter } = require('../../utils/familyFilter')
 const {
   calcNSCMaturity, calcKVPMaturity, calcPOTDMaturity, calcPORDMaturity,
   defaultMaturityDate,
@@ -45,13 +46,14 @@ function estimateMaturity(body) {
 // ── List ────────────────────────────────────────────────────────────────────
 
 async function list(request) {
+  const ff = familyFilter(request)
   const rows = await query(request.server.db,
     `SELECT gsh.*, a.current_value, a.invested_amount, a.notes
      FROM govt_scheme_holdings gsh
      JOIN assets a ON a.id = gsh.asset_id
-     WHERE a.user_id = ? AND a.is_active = 1
+     WHERE a.user_id = ? AND a.is_active = 1${ff.sql}
      ORDER BY gsh.scheme_type, a.created_at DESC`,
-    [request.user.id]
+    [request.user.id, ...ff.params]
   )
   return rows.map((r) => {
     const current_value   = Number(r.current_value)

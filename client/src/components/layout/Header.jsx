@@ -1,13 +1,21 @@
-import { Bell, User, ChevronDown } from 'lucide-react'
+import { Bell, User } from 'lucide-react'
+import { useQuery } from '@tanstack/react-query'
 import { Button } from '@/components/ui/button'
 import useAuthStore from '@/store/authStore'
 import useFilterStore from '@/store/filterStore'
 import { FINANCIAL_YEARS } from '@/utils/constants'
+import api from '@/services/api'
 
 export default function Header() {
   const user = useAuthStore((state) => state.user)
   const logout = useAuthStore((state) => state.logout)
-  const { activeFY, setActiveFY } = useFilterStore()
+  const { activeFY, setActiveFY, activeMemberId, setActiveMember } = useFilterStore()
+
+  const { data: members = [] } = useQuery({
+    queryKey: ['family-members-header'],
+    queryFn: () => api.get('/family').then((r) => r.data),
+    staleTime: 5 * 60 * 1000,
+  })
 
   return (
     <header className="h-14 border-b border-border bg-background flex items-center px-6 gap-4 shrink-0">
@@ -24,6 +32,29 @@ export default function Header() {
           ))}
         </select>
       </div>
+
+      {/* Family member selector — only shown when members exist */}
+      {members.length > 0 && (
+        <div className="flex items-center gap-1.5 text-sm">
+          <span className="text-muted-foreground hidden sm:inline">Viewing</span>
+          <select
+            value={activeMemberId === null ? 'all' : activeMemberId === 0 ? 'self' : String(activeMemberId)}
+            onChange={(e) => {
+              const v = e.target.value
+              if (v === 'all')  setActiveMember(null)
+              else if (v === 'self') setActiveMember(0)
+              else setActiveMember(parseInt(v))
+            }}
+            className="border border-input rounded px-2 py-1 text-sm bg-background focus:outline-none focus:ring-1 focus:ring-ring"
+          >
+            <option value="all">All Members</option>
+            <option value="self">Self</option>
+            {members.map((m) => (
+              <option key={m.id} value={String(m.id)}>{m.full_name}</option>
+            ))}
+          </select>
+        </div>
+      )}
 
       <div className="ml-auto flex items-center gap-2">
         {/* Notifications */}

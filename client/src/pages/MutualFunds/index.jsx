@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge'
 import PageWrapper from '@/components/layout/PageWrapper'
 import Modal from '@/components/shared/Modal'
 import ImportWizard from '@/components/shared/ImportWizard'
+import useFilterStore from '@/store/filterStore'
 import MutualFundForm from './MutualFundForm'
 import TransactionForm from './TransactionForm'
 import { formatINR, formatCompact, formatReturn } from '@/utils/currency'
@@ -170,10 +171,12 @@ function DeleteButton({ onConfirm }) {
 export default function MutualFunds() {
   const qc = useQueryClient()
   const [modal, setModal] = useState(null) // null | {type:'add-fund'} | {type:'add-tx',fund} | {type:'history',fund}
+  const activeMemberId = useFilterStore((s) => s.activeMemberId)
+  const fmParam = activeMemberId === null ? '' : `?family_member_id=${activeMemberId === 0 ? 'self' : activeMemberId}`
 
   const { data = [], isLoading } = useQuery({
-    queryKey: ['mutual-funds'],
-    queryFn: () => api.get('/assets/mutual-funds').then((r) => r.data),
+    queryKey: ['mutual-funds', activeMemberId],
+    queryFn: () => api.get(`/assets/mutual-funds${fmParam}`).then((r) => r.data),
   })
 
   const deleteMutation = useMutation({

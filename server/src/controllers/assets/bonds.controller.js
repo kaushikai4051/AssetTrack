@@ -1,5 +1,6 @@
 const { query, queryOne, insert } = require('../../models/db')
 const { calcYTM, generateCouponSchedule } = require('../../finance/ytm')
+const { familyFilter } = require('../../utils/familyFilter')
 
 function fmtDate(d) {
   if (!d) return null
@@ -46,6 +47,8 @@ async function bondList(request, reply) {
   const params = [request.user.id]
 
   if (type) { sql += ' AND b.bond_type = ?'; params.push(type) }
+  const ff = familyFilter(request)
+  sql += ff.sql; params.push(...ff.params)
   sql += ' ORDER BY b.maturity_date'
 
   const rows = await query(db, sql, params)

@@ -19,4 +19,5 @@ module.exports = async function routes(fastify) {
   fastify.register(require('./reports.routes'), { prefix: '/reports' })
   fastify.register(require('./nominees.routes'), { prefix: '/nominees' })
   fastify.register(require('./documents.routes'), { prefix: '/documents' })
+  fastify.register(require('./family.routes'), { prefix: '/family' })
 }

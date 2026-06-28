@@ -8,6 +8,7 @@ import PageWrapper from '@/components/layout/PageWrapper'
 import Modal from '@/components/shared/Modal'
 import ImportWizard from '@/components/shared/ImportWizard'
 import DocumentsPanel from '@/components/shared/DocumentsPanel'
+import useFilterStore from '@/store/filterStore'
 import FDForm from './FDForm'
 import RDForm from './RDForm'
 import SavingsForm from './SavingsForm'
@@ -64,10 +65,12 @@ function FDTab() {
   const qc = useQueryClient()
   const [modal, setModal] = useState(null) // null | { mode: 'add' | 'edit' | 'import', data? }
   const [docsModal, setDocsModal] = useState(null)
+  const activeMemberId = useFilterStore((s) => s.activeMemberId)
+  const fmParam = activeMemberId === null ? '' : `?family_member_id=${activeMemberId === 0 ? 'self' : activeMemberId}`
 
   const { data = [], isLoading } = useQuery({
-    queryKey: ['fixed-deposits'],
-    queryFn: () => api.get('/assets/fixed-deposits').then((r) => r.data),
+    queryKey: ['fixed-deposits', activeMemberId],
+    queryFn: () => api.get(`/assets/fixed-deposits${fmParam}`).then((r) => r.data),
   })
 
   const deleteMutation = useMutation({
@@ -181,10 +184,12 @@ function FDTab() {
 function RDTab() {
   const qc = useQueryClient()
   const [modal, setModal] = useState(null)
+  const activeMemberId = useFilterStore((s) => s.activeMemberId)
+  const fmParam = activeMemberId === null ? '' : `?family_member_id=${activeMemberId === 0 ? 'self' : activeMemberId}`
 
   const { data = [], isLoading } = useQuery({
-    queryKey: ['recurring-deposits'],
-    queryFn: () => api.get('/assets/recurring-deposits').then((r) => r.data),
+    queryKey: ['recurring-deposits', activeMemberId],
+    queryFn: () => api.get(`/assets/recurring-deposits${fmParam}`).then((r) => r.data),
   })
 
   const deleteMutation = useMutation({
@@ -265,10 +270,12 @@ function RDTab() {
 function SavingsTab() {
   const qc = useQueryClient()
   const [modal, setModal] = useState(null)
+  const activeMemberId = useFilterStore((s) => s.activeMemberId)
+  const fmParam = activeMemberId === null ? '' : `?family_member_id=${activeMemberId === 0 ? 'self' : activeMemberId}`
 
   const { data = [], isLoading } = useQuery({
-    queryKey: ['savings-accounts'],
-    queryFn: () => api.get('/assets/savings-accounts').then((r) => r.data),
+    queryKey: ['savings-accounts', activeMemberId],
+    queryFn: () => api.get(`/assets/savings-accounts${fmParam}`).then((r) => r.data),
   })
 
   const deleteMutation = useMutation({

@@ -15,6 +15,7 @@ import Insurance from '@/pages/Insurance'
 import RealEstate from '@/pages/RealEstate'
 import Goals from '@/pages/Goals'
 import Tax from '@/pages/Tax'
+import Analytics from '@/pages/Analytics'
 import PlaceholderPage from '@/pages/PlaceholderPage'
 
 const router = createBrowserRouter([
@@ -42,6 +43,7 @@ const router = createBrowserRouter([
       { path: 'assets/alternatives', element: <PlaceholderPage title="Alternatives" /> },
       { path: 'goals', element: <Goals /> },
       { path: 'tax', element: <Tax /> },
+      { path: 'analytics', element: <Analytics /> },
       { path: 'reports', element: <PlaceholderPage title="Reports" /> },
       { path: 'family', element: <PlaceholderPage title="Family" /> },
       { path: 'alerts', element: <PlaceholderPage title="Alerts" /> },

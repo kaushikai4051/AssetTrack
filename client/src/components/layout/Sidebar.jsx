@@ -23,6 +23,7 @@ const NAV = [
   { type: 'section', label: 'Planning' },
   { label: 'Goals', icon: Target, to: '/goals' },
   { label: 'Tax', icon: Calculator, to: '/tax' },
+  { label: 'Analytics', icon: BarChart2, to: '/analytics' },
   { label: 'Reports', icon: FileBarChart, to: '/reports' },
   { type: 'section', label: 'Account' },
   { label: 'Family', icon: Users, to: '/family' },

@@ -18,6 +18,7 @@ import Tax from '@/pages/Tax'
 import Analytics from '@/pages/Analytics'
 import Alerts from '@/pages/Alerts'
 import Reports from '@/pages/Reports'
+import Settings from '@/pages/Settings'
 import PlaceholderPage from '@/pages/PlaceholderPage'
 
 const router = createBrowserRouter([
@@ -49,7 +50,7 @@ const router = createBrowserRouter([
       { path: 'reports', element: <Reports /> },
       { path: 'family', element: <PlaceholderPage title="Family" /> },
       { path: 'alerts', element: <Alerts /> },
-      { path: 'settings', element: <PlaceholderPage title="Settings" /> },
+      { path: 'settings', element: <Settings /> },
     ],
   },
   { path: '*', element: <Navigate to="/dashboard" replace /> },

@@ -2,7 +2,8 @@ import { NavLink } from 'react-router-dom'
 import {
   LayoutDashboard, Building2, TrendingUp, BarChart2, Gem,
   FileText, Shield, ShieldCheck, Home, CreditCard, Layers,
-  Target, Calculator, FileBarChart, Users, Bell, Settings, ChevronLeft
+  Target, Calculator, FileBarChart, Users, Bell, Settings, ChevronLeft,
+  UserCheck
 } from 'lucide-react'
 import useUiStore from '@/store/uiStore'
 import { cn } from '@/lib/utils'
@@ -27,6 +28,7 @@ const NAV = [
   { label: 'Reports', icon: FileBarChart, to: '/reports' },
   { type: 'section', label: 'Account' },
   { label: 'Family', icon: Users, to: '/family' },
+  { label: 'Nominees', icon: UserCheck, to: '/nominees' },
   { label: 'Alerts', icon: Bell, to: '/alerts' },
   { label: 'Settings', icon: Settings, to: '/settings' },
 ]

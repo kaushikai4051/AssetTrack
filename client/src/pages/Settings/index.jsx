@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
 import {
-  User, Lock, Info, CheckCircle, AlertCircle, Eye, EyeOff,
+  User, Lock, Info, CheckCircle, AlertCircle, Eye, EyeOff, Palette,
+  Sun, Moon, Monitor,
 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -10,6 +11,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import PageWrapper from '@/components/layout/PageWrapper'
 import useAuthStore from '@/store/authStore'
+import useUiStore from '@/store/uiStore'
 import api from '@/services/api'
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -266,6 +268,81 @@ function SecuritySection() {
   )
 }
 
+// ── Appearance section ────────────────────────────────────────────────────────
+
+const THEMES = [
+  {
+    key: 'light',
+    label: 'Light',
+    icon: Sun,
+    preview: 'bg-white border-2',
+    description: 'Always use light theme',
+  },
+  {
+    key: 'dark',
+    label: 'Dark',
+    icon: Moon,
+    preview: 'bg-gray-900 border-2',
+    description: 'Always use dark theme',
+  },
+  {
+    key: 'system',
+    label: 'System',
+    icon: Monitor,
+    preview: 'bg-gradient-to-br from-white to-gray-900 border-2',
+    description: 'Follow device preference',
+  },
+]
+
+function AppearanceSection() {
+  const user = useAuthStore((s) => s.user)
+  const theme = useUiStore((s) => s.theme)
+  const setTheme = useUiStore((s) => s.setTheme)
+
+  return (
+    <Card>
+      <CardContent className="pt-6">
+        <SectionHeader
+          icon={Palette}
+          title="Appearance"
+          description="Choose how AssetTrack looks for you on this device"
+        />
+
+        <div className="grid grid-cols-3 gap-3">
+          {THEMES.map((t) => {
+            const Icon = t.icon
+            const active = theme === t.key
+            return (
+              <button
+                key={t.key}
+                onClick={() => setTheme(t.key, user?.id)}
+                className={`flex flex-col items-center gap-2 p-3 rounded-xl border-2 transition-all text-sm ${
+                  active
+                    ? 'border-primary bg-primary/5 text-primary'
+                    : 'border-border hover:border-primary/40 text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                {/* Mini preview swatch */}
+                <div className={`w-full h-12 rounded-lg ${t.preview} ${active ? 'border-primary' : 'border-border'} overflow-hidden flex items-end`}>
+                  <div className={`w-full h-4 ${t.key === 'dark' ? 'bg-gray-800' : t.key === 'system' ? 'bg-gradient-to-r from-gray-100 to-gray-700' : 'bg-gray-100'}`} />
+                </div>
+                <div className="flex items-center gap-1.5 font-medium">
+                  <Icon size={14} />
+                  {t.label}
+                </div>
+                <p className="text-[10px] text-center leading-tight opacity-70">{t.description}</p>
+                {active && (
+                  <span className="text-[10px] font-semibold text-primary">Active</span>
+                )}
+              </button>
+            )
+          })}
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+
 // ── Account info section ──────────────────────────────────────────────────────
 
 function AccountSection({ profile }) {
@@ -330,6 +407,7 @@ export default function Settings() {
       <div className="max-w-2xl space-y-4">
         <ProfileSection profile={profile} />
         <SecuritySection />
+        <AppearanceSection />
         <AccountSection profile={profile} />
       </div>
     </PageWrapper>

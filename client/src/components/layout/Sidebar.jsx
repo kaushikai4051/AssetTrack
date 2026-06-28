@@ -3,7 +3,7 @@ import {
   LayoutDashboard, Building2, TrendingUp, BarChart2, Gem,
   FileText, Shield, ShieldCheck, Home, CreditCard, Layers,
   Target, Calculator, FileBarChart, Users, Bell, Settings, ChevronLeft,
-  UserCheck
+  UserCheck, Paperclip,
 } from 'lucide-react'
 import useUiStore from '@/store/uiStore'
 import { cn } from '@/lib/utils'
@@ -29,6 +29,7 @@ const NAV = [
   { type: 'section', label: 'Account' },
   { label: 'Family', icon: Users, to: '/family' },
   { label: 'Nominees', icon: UserCheck, to: '/nominees' },
+  { label: 'Documents', icon: Paperclip, to: '/documents' },
   { label: 'Alerts', icon: Bell, to: '/alerts' },
   { label: 'Settings', icon: Settings, to: '/settings' },
 ]

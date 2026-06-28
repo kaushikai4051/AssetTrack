@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Plus, Pencil, Trash2, Calculator } from 'lucide-react'
+import { Plus, Pencil, Trash2, Calculator, Paperclip } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -8,6 +8,7 @@ import PageWrapper from '@/components/layout/PageWrapper'
 import Modal from '@/components/shared/Modal'
 import LoanForm from './LoanForm'
 import PrepaymentSimulator from './PrepaymentSimulator'
+import DocumentsPanel from '@/components/shared/DocumentsPanel'
 import { formatINR, formatCompact } from '@/utils/currency'
 import api from '@/services/api'
 
@@ -92,6 +93,7 @@ export default function Loans() {
   const [activeType, setActiveType] = useState('all')
   const [formModal, setFormModal]   = useState(null)
   const [simModal, setSimModal]     = useState(null)
+  const [docsModal, setDocsModal]   = useState(null)
 
   const { data = [], isLoading } = useQuery({
     queryKey: ['loans', activeType],
@@ -222,6 +224,14 @@ export default function Loans() {
                         <Button
                           size="icon" variant="ghost"
                           className="h-7 w-7 text-muted-foreground"
+                          title="Documents"
+                          onClick={() => setDocsModal(loan)}
+                        >
+                          <Paperclip size={13} />
+                        </Button>
+                        <Button
+                          size="icon" variant="ghost"
+                          className="h-7 w-7 text-muted-foreground"
                           onClick={() => setFormModal({ mode: 'edit', data: loan })}
                         >
                           <Pencil size={13} />
@@ -265,6 +275,12 @@ export default function Loans() {
       {simModal && (
         <Modal title="Prepayment Simulator" onClose={() => setSimModal(null)}>
           <PrepaymentSimulator loan={simModal} onClose={() => setSimModal(null)} />
+        </Modal>
+      )}
+
+      {docsModal && (
+        <Modal title={`Documents — ${docsModal.lender}`} onClose={() => setDocsModal(null)}>
+          <DocumentsPanel assetType={docsModal.loan_type + '_loan'} assetId={docsModal.id} />
         </Modal>
       )}
     </PageWrapper>

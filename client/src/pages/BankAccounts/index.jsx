@@ -1,12 +1,13 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Plus, Pencil, Trash2, Upload } from 'lucide-react'
+import { Plus, Pencil, Trash2, Upload, Paperclip } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import PageWrapper from '@/components/layout/PageWrapper'
 import Modal from '@/components/shared/Modal'
 import ImportWizard from '@/components/shared/ImportWizard'
+import DocumentsPanel from '@/components/shared/DocumentsPanel'
 import FDForm from './FDForm'
 import RDForm from './RDForm'
 import SavingsForm from './SavingsForm'
@@ -62,6 +63,7 @@ function DeleteButton({ onConfirm }) {
 function FDTab() {
   const qc = useQueryClient()
   const [modal, setModal] = useState(null) // null | { mode: 'add' | 'edit' | 'import', data? }
+  const [docsModal, setDocsModal] = useState(null)
 
   const { data = [], isLoading } = useQuery({
     queryKey: ['fixed-deposits'],
@@ -130,6 +132,9 @@ function FDTab() {
                     <div className="text-xs text-muted-foreground mt-1">{fd.maturity_date}</div>
                   </div>
                   <div className="flex items-center gap-1 shrink-0">
+                    <Button size="icon" variant="ghost" className="h-7 w-7 text-muted-foreground" title="Documents" onClick={() => setDocsModal(fd)}>
+                      <Paperclip size={13} />
+                    </Button>
                     <Button size="icon" variant="ghost" className="h-7 w-7 text-muted-foreground" onClick={() => setModal({ mode: 'edit', data: fd })}>
                       <Pencil size={13} />
                     </Button>
@@ -160,6 +165,11 @@ function FDTab() {
           onClose={() => setModal(null)}
         >
           <FDForm initialData={modal.data} onClose={() => setModal(null)} />
+        </Modal>
+      )}
+      {docsModal && (
+        <Modal title={`Documents — ${docsModal.bank_name}`} onClose={() => setDocsModal(null)}>
+          <DocumentsPanel assetType="fixed_deposit" assetId={docsModal.id} />
         </Modal>
       )}
     </>

@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import PageWrapper from '@/components/layout/PageWrapper'
 import { formatINR, formatCompact } from '@/utils/currency'
+import useAuthStore from '@/store/authStore'
 import api from '@/services/api'
 
 // ── Utilities ─────────────────────────────────────────────────────────────────
@@ -19,19 +20,33 @@ function buildFYOptions() {
   })
 }
 
-function downloadCSV(filename, rows) {
+function generatedAt() {
+  return new Date().toLocaleString('en-IN', {
+    day: 'numeric', month: 'long', year: 'numeric',
+    hour: '2-digit', minute: '2-digit',
+  })
+}
+
+function downloadCSV(filename, rows, reportTitle, user) {
   if (!rows.length) return
   const headers = Object.keys(rows[0])
-  const csv = [
+  const escape = (v) => {
+    const s = String(v ?? '')
+    return s.includes(',') || s.includes('"') ? `"${s.replace(/"/g, '""')}"` : s
+  }
+  const meta = [
+    `Application,AssetTrack`,
+    `Report,"${reportTitle}"`,
+    `Generated,"${generatedAt()}"`,
+    `User,"${user?.full_name || ''} (${user?.email || ''})"`,
+    ``,
+  ]
+  const dataRows = [
     headers.join(','),
-    ...rows.map((r) =>
-      headers.map((h) => {
-        const v = r[h] ?? ''
-        return typeof v === 'string' && v.includes(',') ? `"${v}"` : v
-      }).join(',')
-    ),
-  ].join('\n')
-  const blob = new Blob([csv], { type: 'text/csv' })
+    ...rows.map((r) => headers.map((h) => escape(r[h])).join(',')),
+  ]
+  const csv = [...meta, ...dataRows].join('\n')
+  const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' })
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url
@@ -40,20 +55,34 @@ function downloadCSV(filename, rows) {
   URL.revokeObjectURL(url)
 }
 
-function printSection(id) {
+function printSection(id, reportTitle, user) {
   const el = document.getElementById(id)
   if (!el) return
   const w = window.open('', '_blank')
-  w.document.write(`<html><head><title>Report</title>
+  const header = `
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #6366f1;padding-bottom:12px;margin-bottom:20px">
+      <div>
+        <div style="font-size:22px;font-weight:700;color:#6366f1;letter-spacing:-0.5px">AssetTrack</div>
+        <div style="font-size:11px;color:#64748b;margin-top:2px">Personal Finance &amp; Asset Management</div>
+      </div>
+      <div style="text-align:right;font-size:11px;color:#64748b;line-height:1.6">
+        <div><strong>${reportTitle}</strong></div>
+        <div>${user?.full_name || ''}</div>
+        <div>${user?.email || ''}</div>
+        <div>Generated: ${generatedAt()}</div>
+      </div>
+    </div>`
+  w.document.write(`<html><head><title>${reportTitle} — AssetTrack</title>
     <style>
-      body{font-family:sans-serif;font-size:13px;color:#111;padding:24px}
+      body{font-family:sans-serif;font-size:13px;color:#111;padding:24px;max-width:900px;margin:0 auto}
       table{width:100%;border-collapse:collapse;margin-top:12px}
       th{background:#f1f5f9;text-align:left;padding:6px 8px;font-size:11px;text-transform:uppercase;letter-spacing:.05em}
       td{padding:6px 8px;border-bottom:1px solid #e2e8f0}
       h2{margin-bottom:4px} .sub{color:#64748b;font-size:12px;margin-bottom:16px}
       .total{font-weight:600;background:#f8fafc}
+      @media print{body{padding:16px}}
     </style>
-  </head><body>${el.innerHTML}</body></html>`)
+  </head><body>${header}${el.innerHTML}</body></html>`)
   w.document.close()
   w.print()
 }
@@ -95,7 +124,7 @@ function TabBar({ active, onChange }) {
 
 // ── Action bar ────────────────────────────────────────────────────────────────
 
-function Actions({ onPrint, onCSV, fyOptions, fy, onFYChange }) {
+function Actions({ onPrint, onCSV, fyOptions, fy, onFYChange, user, reportTitle }) {
   return (
     <div className="flex flex-wrap items-center justify-between gap-2">
       {fyOptions && (
@@ -112,11 +141,11 @@ function Actions({ onPrint, onCSV, fyOptions, fy, onFYChange }) {
       )}
       <div className="flex gap-2 ml-auto">
         {onCSV && (
-          <Button variant="outline" size="sm" onClick={onCSV}>
+          <Button variant="outline" size="sm" onClick={() => onCSV(reportTitle, user)}>
             <Download size={14} className="mr-1" /> CSV
           </Button>
         )}
-        <Button variant="outline" size="sm" onClick={onPrint}>
+        <Button variant="outline" size="sm" onClick={() => onPrint(reportTitle, user)}>
           <Printer size={14} className="mr-1" /> Print / PDF
         </Button>
       </div>
@@ -141,7 +170,7 @@ function LoadingState() {
 
 // ── Net Worth report ──────────────────────────────────────────────────────────
 
-function NetWorthReport() {
+function NetWorthReport({ user }) {
   const { data, isLoading, isError } = useQuery({
     queryKey: ['reports', 'net-worth'],
     queryFn: () => api.get('/reports/net-worth').then((r) => r.data),
@@ -163,8 +192,10 @@ function NetWorthReport() {
   return (
     <div className="space-y-4">
       <Actions
-        onPrint={() => printSection('nw-print')}
-        onCSV={() => downloadCSV(`net-worth-${data.asOf}.csv`, csvRows)}
+        reportTitle="Net Worth Snapshot"
+        user={user}
+        onPrint={(title, u) => printSection('nw-print', title, u)}
+        onCSV={(title, u) => downloadCSV(`net-worth-${data.asOf}.csv`, csvRows, title, u)}
       />
 
       <div id="nw-print">
@@ -234,7 +265,7 @@ function NetWorthReport() {
 
 // ── Capital Gains report ──────────────────────────────────────────────────────
 
-function CapitalGainsReport() {
+function CapitalGainsReport({ user }) {
   const FY_OPTIONS = buildFYOptions()
   const [fy, setFY] = useState(FY_OPTIONS[0])
 
@@ -265,11 +296,13 @@ function CapitalGainsReport() {
   return (
     <div className="space-y-4">
       <Actions
+        reportTitle={`Capital Gains — FY ${fy}`}
+        user={user}
         fyOptions={FY_OPTIONS}
         fy={fy}
         onFYChange={setFY}
-        onPrint={() => printSection('cg-print')}
-        onCSV={gains.length ? () => downloadCSV(`capital-gains-${fy}.csv`, csvRows) : null}
+        onPrint={(title, u) => printSection('cg-print', title, u)}
+        onCSV={gains.length ? (title, u) => downloadCSV(`capital-gains-${fy}.csv`, csvRows, title, u) : null}
       />
 
       <div id="cg-print">
@@ -333,7 +366,7 @@ function CapitalGainsReport() {
 
 // ── Interest Income report ────────────────────────────────────────────────────
 
-function InterestIncomeReport() {
+function InterestIncomeReport({ user }) {
   const FY_OPTIONS = buildFYOptions()
   const [fy, setFY] = useState(FY_OPTIONS[0])
 
@@ -350,13 +383,15 @@ function InterestIncomeReport() {
   return (
     <div className="space-y-4">
       <Actions
+        reportTitle={`Interest & Income — FY ${fy}`}
+        user={user}
         fyOptions={FY_OPTIONS}
         fy={fy}
         onFYChange={setFY}
-        onPrint={() => printSection('inc-print')}
-        onCSV={income.length ? () => downloadCSV(`interest-income-${fy}.csv`, income.map((r) => ({
+        onPrint={(title, u) => printSection('inc-print', title, u)}
+        onCSV={income.length ? (title, u) => downloadCSV(`interest-income-${fy}.csv`, income.map((r) => ({
           Source: r.source, Type: r.type, Detail: r.detail, 'Amount (₹)': r.amount,
-        }))) : null}
+        })), title, u) : null}
       />
 
       <div id="inc-print">
@@ -404,7 +439,7 @@ function InterestIncomeReport() {
 
 // ── Insurance report ──────────────────────────────────────────────────────────
 
-function InsuranceReport() {
+function InsuranceReport({ user }) {
   const { data, isLoading, isError } = useQuery({
     queryKey: ['reports', 'insurance'],
     queryFn: () => api.get('/reports/insurance').then((r) => r.data),
@@ -424,8 +459,10 @@ function InsuranceReport() {
   return (
     <div className="space-y-4">
       <Actions
-        onPrint={() => printSection('ins-print')}
-        onCSV={csvRows.length ? () => downloadCSV('insurance-summary.csv', csvRows) : null}
+        reportTitle="Insurance Coverage Summary"
+        user={user}
+        onPrint={(title, u) => printSection('ins-print', title, u)}
+        onCSV={csvRows.length ? (title, u) => downloadCSV('insurance-summary.csv', csvRows, title, u) : null}
       />
 
       <div id="ins-print">
@@ -484,7 +521,7 @@ function InsuranceReport() {
 
 // ── Loans report ──────────────────────────────────────────────────────────────
 
-function LoansReport() {
+function LoansReport({ user }) {
   const { data, isLoading, isError } = useQuery({
     queryKey: ['reports', 'loans'],
     queryFn: () => api.get('/reports/loans').then((r) => r.data),
@@ -506,8 +543,10 @@ function LoansReport() {
   return (
     <div className="space-y-4">
       <Actions
-        onPrint={() => printSection('loan-print')}
-        onCSV={loans.length ? () => downloadCSV('loan-statement.csv', csvRows) : null}
+        reportTitle="Loan Statement"
+        user={user}
+        onPrint={(title, u) => printSection('loan-print', title, u)}
+        onCSV={loans.length ? (title, u) => downloadCSV('loan-statement.csv', csvRows, title, u) : null}
       />
 
       <div id="loan-print">
@@ -573,17 +612,18 @@ function LoansReport() {
 
 export default function Reports() {
   const [tab, setTab] = useState('networth')
+  const user = useAuthStore((s) => s.user)
 
   return (
     <PageWrapper title="Reports" description="Financial summaries ready for review and export">
       <TabBar active={tab} onChange={setTab} />
 
       <div className="mt-4">
-        {tab === 'networth'  && <NetWorthReport />}
-        {tab === 'capgains'  && <CapitalGainsReport />}
-        {tab === 'income'    && <InterestIncomeReport />}
-        {tab === 'insurance' && <InsuranceReport />}
-        {tab === 'loans'     && <LoansReport />}
+        {tab === 'networth'  && <NetWorthReport user={user} />}
+        {tab === 'capgains'  && <CapitalGainsReport user={user} />}
+        {tab === 'income'    && <InterestIncomeReport user={user} />}
+        {tab === 'insurance' && <InsuranceReport user={user} />}
+        {tab === 'loans'     && <LoansReport user={user} />}
       </div>
     </PageWrapper>
   )

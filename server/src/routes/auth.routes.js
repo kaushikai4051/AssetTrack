@@ -6,4 +6,6 @@ module.exports = async function authRoutes(fastify) {
   fastify.post('/logout', authController.logout)
   fastify.post('/refresh', authController.refresh)
   fastify.get('/me', { preHandler: fastify.authenticate }, authController.me)
+  fastify.put('/profile', { preHandler: fastify.authenticate }, authController.updateProfile)
+  fastify.put('/change-password', { preHandler: fastify.authenticate }, authController.changePassword)
 }

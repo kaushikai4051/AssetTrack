@@ -168,14 +168,73 @@ async function refresh(request, reply) {
 
 async function me(request, reply) {
   const row = await queryOne(request.server.db,
-    `SELECT u.id, u.email, p.full_name, p.dob, p.risk_profile
+    `SELECT u.id, u.email, u.created_at,
+            p.full_name, p.dob, p.risk_profile, p.pan, p.base_currency
      FROM users u
      JOIN user_profiles p ON p.user_id = u.id
      WHERE u.id = ?`,
     [request.user.id]
   )
   if (!row) return reply.status(404).send({ message: 'User not found' })
+  // Mask PAN: show first 5 + last 1, hide middle 4
+  if (row.pan) row.pan_masked = row.pan.slice(0, 5) + '****' + row.pan.slice(-1)
   return row
 }
 
-module.exports = { register, login, logout, refresh, me }
+async function updateProfile(request, reply) {
+  const userId = request.user.id
+  const { full_name, dob, risk_profile, pan, base_currency } = request.body || {}
+
+  if (!full_name || full_name.trim().length < 2) {
+    return reply.status(400).send({ message: 'Full name is required' })
+  }
+
+  await request.server.db.execute(
+    `UPDATE user_profiles
+     SET full_name = ?, dob = ?, risk_profile = ?, pan = ?, base_currency = ?
+     WHERE user_id = ?`,
+    [
+      full_name.trim(),
+      dob || null,
+      risk_profile || null,
+      pan ? pan.toUpperCase().trim() : null,
+      base_currency || 'INR',
+      userId,
+    ]
+  )
+
+  const updated = await queryOne(request.server.db,
+    `SELECT u.id, u.email, p.full_name, p.dob, p.risk_profile, p.base_currency
+     FROM users u JOIN user_profiles p ON p.user_id = u.id WHERE u.id = ?`,
+    [userId]
+  )
+  return { message: 'Profile updated', user: updated }
+}
+
+async function changePassword(request, reply) {
+  const userId = request.user.id
+  const { current_password, new_password } = request.body || {}
+
+  if (!current_password || !new_password) {
+    return reply.status(400).send({ message: 'current_password and new_password are required' })
+  }
+  if (new_password.length < 8) {
+    return reply.status(400).send({ message: 'New password must be at least 8 characters' })
+  }
+
+  const row = await queryOne(request.server.db,
+    'SELECT password_hash FROM users WHERE id = ?', [userId]
+  )
+  if (!row) return reply.status(404).send({ message: 'User not found' })
+
+  const match = await bcrypt.compare(current_password, row.password_hash)
+  if (!match) return reply.status(400).send({ message: 'Current password is incorrect' })
+
+  const newHash = await bcrypt.hash(new_password, 12)
+  await request.server.db.execute(
+    'UPDATE users SET password_hash = ? WHERE id = ?', [newHash, userId]
+  )
+  return { message: 'Password changed successfully' }
+}
+
+module.exports = { register, login, logout, refresh, me, updateProfile, changePassword }

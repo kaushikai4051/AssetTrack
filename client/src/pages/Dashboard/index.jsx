@@ -1,9 +1,18 @@
 import { useQuery } from '@tanstack/react-query'
-import { TrendingUp, TrendingDown, Wallet, AlertCircle } from 'lucide-react'
+import {
+  TrendingUp, TrendingDown, Wallet, BarChart2, AlertCircle,
+  Calendar, ShieldCheck, CreditCard,
+} from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
 import PageWrapper from '@/components/layout/PageWrapper'
+import NetWorthLine from '@/components/charts/NetWorthLine'
+import AllocationPie from '@/components/charts/AllocationPie'
+import TopHoldings from '@/components/charts/TopHoldings'
 import { formatCompact, formatINR } from '@/utils/currency'
 import api from '@/services/api'
+
+// ── Stat card ─────────────────────────────────────────────────────────────────
 
 function StatCard({ title, value, sub, icon: Icon, trend }) {
   return (
@@ -26,6 +35,70 @@ function StatCard({ title, value, sub, icon: Icon, trend }) {
   )
 }
 
+// ── Event type helpers ─────────────────────────────────────────────────────────
+
+const EVENT_ICON = {
+  maturity: Calendar,
+  insurance: ShieldCheck,
+  emi: CreditCard,
+}
+
+const EVENT_COLOR = {
+  maturity: 'text-amber-600',
+  insurance: 'text-blue-600',
+  emi: 'text-purple-600',
+}
+
+function daysUntil(dateStr) {
+  const diff = Math.ceil((new Date(dateStr) - new Date()) / 86400000)
+  if (diff === 0) return 'Today'
+  if (diff === 1) return 'Tomorrow'
+  return `${diff}d`
+}
+
+function UpcomingEvents() {
+  const { data, isLoading } = useQuery({
+    queryKey: ['dashboard', 'upcoming-events'],
+    queryFn: () => api.get('/dashboard/upcoming-events').then((r) => r.data),
+  })
+
+  const events = data?.events ?? []
+
+  return (
+    <Card className="h-full">
+      <CardHeader className="pb-2">
+        <CardTitle className="text-base">Upcoming Events</CardTitle>
+        <CardDescription className="text-xs">Maturities, EMIs &amp; renewals in the next 60 days</CardDescription>
+      </CardHeader>
+      <CardContent className="p-0">
+        {isLoading ? (
+          <div className="h-48 m-6 bg-muted rounded animate-pulse" />
+        ) : !events.length ? (
+          <p className="text-sm text-muted-foreground px-6 py-4">No upcoming events.</p>
+        ) : (
+          <ul>
+            {events.map((ev, i) => {
+              const Icon = EVENT_ICON[ev.type] || Calendar
+              const colorClass = EVENT_COLOR[ev.type] || 'text-muted-foreground'
+              return (
+                <li key={i} className="flex items-center gap-3 px-6 py-2.5 border-b last:border-0 text-sm">
+                  <Icon size={15} className={`shrink-0 ${colorClass}`} />
+                  <span className="flex-1 truncate">{ev.label}</span>
+                  <Badge variant="outline" className="text-xs shrink-0">
+                    {daysUntil(ev.date)}
+                  </Badge>
+                </li>
+              )
+            })}
+          </ul>
+        )}
+      </CardContent>
+    </Card>
+  )
+}
+
+// ── Dashboard page ─────────────────────────────────────────────────────────────
+
 export default function Dashboard() {
   const { data, isLoading, isError } = useQuery({
     queryKey: ['dashboard', 'summary'],
@@ -33,90 +106,80 @@ export default function Dashboard() {
     retry: false,
   })
 
-  if (isLoading) {
-    return (
-      <PageWrapper title="Dashboard">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {[...Array(4)].map((_, i) => (
-            <Card key={i}>
-              <CardContent className="p-6">
-                <div className="h-16 bg-muted rounded animate-pulse" />
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </PageWrapper>
-    )
-  }
-
   if (isError) {
     return (
       <PageWrapper title="Dashboard">
         <Card>
           <CardContent className="flex items-center gap-3 p-6 text-muted-foreground">
             <AlertCircle size={18} />
-            <span>Could not load dashboard data. Make sure the server is running.</span>
+            <span>Could not load dashboard. Make sure the server is running.</span>
           </CardContent>
         </Card>
       </PageWrapper>
     )
   }
 
-  const summary = data || {}
+  const s = data || {}
 
   return (
-    <PageWrapper
-      title="Dashboard"
-      description="Your complete financial overview"
-    >
-      {/* Stat cards */}
+    <PageWrapper title="Dashboard" description="Your complete financial overview">
+
+      {/* Row 1 — stat cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard
-          title="Net Worth"
-          value={formatCompact(summary.netWorth ?? 0)}
-          sub={`Assets: ${formatCompact(summary.totalAssets ?? 0)} · Liabilities: ${formatCompact(summary.totalLiabilities ?? 0)}`}
-          icon={Wallet}
-          trend={summary.overallReturn}
-        />
-        <StatCard
-          title="Total Invested"
-          value={formatCompact(summary.totalInvested ?? 0)}
-          icon={TrendingUp}
-        />
-        <StatCard
-          title="Total Gain / Loss"
-          value={formatINR(summary.totalGain ?? 0)}
-          icon={summary.totalGain >= 0 ? TrendingUp : TrendingDown}
-        />
-        <StatCard
-          title="Active Assets"
-          value={summary.assetCount ?? 0}
-          sub="across all categories"
-          icon={Wallet}
-        />
+        {isLoading ? (
+          [...Array(4)].map((_, i) => (
+            <Card key={i}>
+              <CardContent className="p-6">
+                <div className="h-16 bg-muted rounded animate-pulse" />
+              </CardContent>
+            </Card>
+          ))
+        ) : (
+          <>
+            <StatCard
+              title="Net Worth"
+              value={formatCompact(s.netWorth ?? 0)}
+              sub={`Assets ${formatCompact(s.totalAssets ?? 0)} · Liabilities ${formatCompact(s.totalLiabilities ?? 0)}`}
+              icon={Wallet}
+              trend={s.overallReturn}
+            />
+            <StatCard
+              title="Total Invested"
+              value={formatCompact(s.totalInvested ?? 0)}
+              icon={TrendingUp}
+            />
+            <StatCard
+              title="Total Gain / Loss"
+              value={formatINR(s.totalGain ?? 0)}
+              sub={s.totalGain >= 0 ? 'unrealised gain' : 'unrealised loss'}
+              icon={s.totalGain >= 0 ? TrendingUp : TrendingDown}
+            />
+            <StatCard
+              title="Active Assets"
+              value={s.assetCount ?? 0}
+              sub="across all categories"
+              icon={BarChart2}
+            />
+          </>
+        )}
       </div>
 
-      {/* Upcoming events */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Upcoming Events</CardTitle>
-          <CardDescription>Maturities, due dates and reminders in the next 60 days</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {summary.upcomingEvents?.length ? (
-            <ul className="space-y-2">
-              {summary.upcomingEvents.map((ev, i) => (
-                <li key={i} className="flex items-center justify-between text-sm border-b last:border-0 pb-2 last:pb-0">
-                  <span>{ev.label}</span>
-                  <span className="text-muted-foreground">{ev.date}</span>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="text-sm text-muted-foreground">No upcoming events. Add assets to get started.</p>
-          )}
-        </CardContent>
-      </Card>
+      {/* Row 2 — charts */}
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
+        <div className="lg:col-span-3">
+          <NetWorthLine />
+        </div>
+        <div className="lg:col-span-2">
+          <AllocationPie />
+        </div>
+      </div>
+
+      {/* Row 3 — holdings + events */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <TopHoldings />
+        <UpcomingEvents />
+      </div>
+
     </PageWrapper>
   )
 }

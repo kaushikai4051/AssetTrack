@@ -10,7 +10,7 @@ export default function Header() {
   const { activeFY, setActiveFY } = useFilterStore()
 
   return (
-    <header className="h-14 border-b border-border bg-white flex items-center px-6 gap-4 shrink-0">
+    <header className="h-14 border-b border-border bg-background flex items-center px-6 gap-4 shrink-0">
       {/* FY selector */}
       <div className="flex items-center gap-1.5 text-sm">
         <span className="text-muted-foreground">FY</span>

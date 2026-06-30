@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { Outlet } from 'react-router-dom'
 import Sidebar from './Sidebar'
 import Header from './Header'
+import Footer from './Footer'
 import useUiStore from '@/store/uiStore'
 import useAuthStore from '@/store/authStore'
 import { cn } from '@/lib/utils'
@@ -28,6 +29,7 @@ export default function AppShell() {
         <main className="flex-1 overflow-y-auto p-6">
           <Outlet />
         </main>
+        <Footer />
       </div>
     </div>
   )

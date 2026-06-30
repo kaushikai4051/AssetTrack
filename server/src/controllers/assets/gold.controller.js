@@ -1,4 +1,5 @@
 const { query, insert } = require('../../models/db')
+const { familyFilter } = require('../../utils/familyFilter')
 
 // INR purity factors for physical gold
 const PURITY_FACTOR = {
@@ -19,13 +20,14 @@ function calcCurrentValue(row) {
 }
 
 async function list(request, reply) {
+  const ff = familyFilter(request)
   const rows = await query(request.server.db,
     `SELECT gh.*, a.current_value, a.invested_amount, a.notes
      FROM gold_holdings gh
      JOIN assets a ON a.id = gh.asset_id
-     WHERE a.user_id = ? AND a.is_active = 1
+     WHERE a.user_id = ? AND a.is_active = 1${ff.sql}
      ORDER BY a.created_at DESC`,
-    [request.user.id]
+    [request.user.id, ...ff.params]
   )
   return rows.map((r) => {
     const current_value   = Number(r.current_value)

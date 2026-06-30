@@ -1,5 +1,6 @@
 const { query, queryOne, insert } = require('../../models/db')
 const { classifyLots }            = require('../../finance/capitalGains')
+const { familyFilter }            = require('../../utils/familyFilter')
 
 function fmtDate(d) {
   if (!d) return null
@@ -79,6 +80,7 @@ async function recalcHolding(conn, holdingId) {
 async function list(request, reply) {
   const db     = request.server.db
   const userId = request.user.id
+  const ff     = familyFilter(request)
 
   const holdings = await query(db,
     `SELECT sh.id, sh.ticker, sh.company_name, sh.exchange, sh.sector, sh.isin,
@@ -86,9 +88,9 @@ async function list(request, reply) {
             a.id AS asset_id, a.current_value, a.invested_amount
      FROM stock_holdings sh
      JOIN assets a ON a.id = sh.asset_id
-     WHERE a.user_id = ? AND a.is_active = 1
+     WHERE a.user_id = ? AND a.is_active = 1${ff.sql}
      ORDER BY a.current_value DESC`,
-    [userId]
+    [userId, ...ff.params]
   )
   if (!holdings.length) return []
 

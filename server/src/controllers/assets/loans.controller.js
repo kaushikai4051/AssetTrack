@@ -1,5 +1,6 @@
 const { query, queryOne, insert } = require('../../models/db')
 const { calcEMI, generateAmortization, calcPrepaymentSavings } = require('../../finance/emi')
+const { familyFilter } = require('../../utils/familyFilter')
 
 function fmtDate(d) {
   if (!d) return null
@@ -53,7 +54,8 @@ async function loanList(request, reply) {
     sql += ' AND l.loan_type = ?'
     params.push(type)
   }
-
+  const ff = familyFilter(request)
+  sql += ff.sql; params.push(...ff.params)
   sql += ' ORDER BY l.disbursement_date DESC'
 
   const rows = await query(db, sql, params)

@@ -8,6 +8,7 @@ import PageWrapper from '@/components/layout/PageWrapper'
 import Modal from '@/components/shared/Modal'
 import BondForm from './BondForm'
 import { formatINR, formatCompact } from '@/utils/currency'
+import useFilterStore from '@/store/filterStore'
 import api from '@/services/api'
 
 const BOND_TABS = [
@@ -74,11 +75,15 @@ export default function Bonds() {
   const qc = useQueryClient()
   const [activeType, setActiveType] = useState('all')
   const [modal, setModal] = useState(null)
+  const activeMemberId = useFilterStore((s) => s.activeMemberId)
 
   const { data = [], isLoading } = useQuery({
-    queryKey: ['bonds', activeType],
+    queryKey: ['bonds', activeType, activeMemberId],
     queryFn: () => {
-      const params = activeType !== 'all' ? `?type=${activeType}` : ''
+      const qs = new URLSearchParams()
+      if (activeType !== 'all') qs.set('type', activeType)
+      if (activeMemberId !== null) qs.set('family_member_id', activeMemberId === 0 ? 'self' : activeMemberId)
+      const params = qs.toString() ? `?${qs}` : ''
       return api.get(`/assets/bonds${params}`).then((r) => r.data)
     },
   })

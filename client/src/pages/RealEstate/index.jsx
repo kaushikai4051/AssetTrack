@@ -9,6 +9,7 @@ import Modal from '@/components/shared/Modal'
 import PropertyForm from './PropertyForm'
 import DocumentsPanel from '@/components/shared/DocumentsPanel'
 import { formatINR, formatCompact } from '@/utils/currency'
+import useFilterStore from '@/store/filterStore'
 import api from '@/services/api'
 
 const TABS = [
@@ -76,10 +77,12 @@ export default function RealEstate() {
   const [activeType, setActiveType] = useState('all')
   const [modal, setModal] = useState(null)
   const [docsModal, setDocsModal] = useState(null)
+  const activeMemberId = useFilterStore((s) => s.activeMemberId)
+  const fmParam = activeMemberId === null ? '' : `?family_member_id=${activeMemberId === 0 ? 'self' : activeMemberId}`
 
   const { data = [], isLoading } = useQuery({
-    queryKey: ['real-estate', activeType],
-    queryFn: () => api.get('/assets/real-estate').then((r) => r.data),
+    queryKey: ['real-estate', activeType, activeMemberId],
+    queryFn: () => api.get(`/assets/real-estate${fmParam}`).then((r) => r.data),
   })
 
   const filtered = activeType === 'all' ? data : data.filter((p) => p.property_type === activeType)

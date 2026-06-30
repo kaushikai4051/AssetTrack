@@ -5,6 +5,8 @@ function fmtDate(d) {
   return d instanceof Date ? d.toISOString().slice(0, 10) : d
 }
 
+const { familyFilter } = require('../../utils/familyFilter')
+
 const INS_ASSET_TYPE = {
   term:               'life_insurance',
   endowment:          'life_insurance',
@@ -52,6 +54,8 @@ async function policyList(request, reply) {
   const params = [request.user.id]
 
   if (type) { sql += ' AND ip.insurance_type = ?'; params.push(type) }
+  const ff = familyFilter(request)
+  sql += ff.sql; params.push(...ff.params)
   sql += ' ORDER BY ip.renewal_date ASC'
 
   const rows = await query(db, sql, params)

@@ -9,6 +9,7 @@ import Modal from '@/components/shared/Modal'
 import StockForm from './StockForm'
 import StockTransactionForm from './StockTransactionForm'
 import { formatINR, formatCompact, formatReturn } from '@/utils/currency'
+import useFilterStore from '@/store/filterStore'
 import api from '@/services/api'
 
 function PnlBadge({ pct }) {
@@ -198,10 +199,12 @@ export default function Stocks() {
   const [activeSector, setActiveSector] = useState('All')
   const [refreshing, setRefreshing] = useState(new Set()) // asset_ids currently fetching price
   const [refreshError, setRefreshError] = useState(null)  // { assetId, message }
+  const activeMemberId = useFilterStore((s) => s.activeMemberId)
+  const fmParam = activeMemberId === null ? '' : `?family_member_id=${activeMemberId === 0 ? 'self' : activeMemberId}`
 
   const { data = [], isLoading } = useQuery({
-    queryKey: ['stocks'],
-    queryFn: () => api.get('/assets/stocks').then((r) => r.data),
+    queryKey: ['stocks', activeMemberId],
+    queryFn: () => api.get(`/assets/stocks${fmParam}`).then((r) => r.data),
   })
 
   const deleteMutation = useMutation({

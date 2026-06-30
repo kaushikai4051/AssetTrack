@@ -8,6 +8,7 @@ import PageWrapper from '@/components/layout/PageWrapper'
 import Modal from '@/components/shared/Modal'
 import GoldForm from './GoldForm'
 import { formatINR, formatCompact, formatReturn } from '@/utils/currency'
+import useFilterStore from '@/store/filterStore'
 import api from '@/services/api'
 
 const TYPE_LABEL = { physical: 'Physical', digital: 'Digital', etf: 'ETF', sgb: 'SGB' }
@@ -57,10 +58,12 @@ export default function Gold() {
   const [modal, setModal]         = useState(null) // null | { type: 'add' }
   const [activeType, setActiveType] = useState('All')
   const [refreshing, setRefreshing] = useState(false)
+  const activeMemberId = useFilterStore((s) => s.activeMemberId)
+  const fmParam = activeMemberId === null ? '' : `?family_member_id=${activeMemberId === 0 ? 'self' : activeMemberId}`
 
   const { data = [], isLoading } = useQuery({
-    queryKey: ['gold'],
-    queryFn: () => api.get('/assets/gold').then((r) => r.data),
+    queryKey: ['gold', activeMemberId],
+    queryFn: () => api.get(`/assets/gold${fmParam}`).then((r) => r.data),
   })
 
   const deleteMutation = useMutation({

@@ -1,5 +1,6 @@
 const { query, queryOne, insert } = require('../../models/db')
 const { calcFDMaturity, calcRDMaturity } = require('../../finance/fd')
+const { familyFilter } = require('../../utils/familyFilter')
 
 // ── helpers ──────────────────────────────────────────────────────────────────
 
@@ -18,15 +19,16 @@ function addMonths(dateStr, months) {
 
 async function fdList(request, reply) {
   const db = request.server.db
+  const ff = familyFilter(request)
   const rows = await query(db,
     `SELECT a.id, a.asset_name, a.notes, a.family_member_id, a.current_value,
             fd.bank_name, fd.account_number, fd.principal, fd.interest_rate,
             fd.compounding, fd.start_date, fd.maturity_date, fd.maturity_amount,
             fd.is_auto_renew, fd.nominee_name
      FROM assets a JOIN fixed_deposits fd ON fd.asset_id = a.id
-     WHERE a.user_id = ? AND a.is_active = 1
+     WHERE a.user_id = ? AND a.is_active = 1${ff.sql}
      ORDER BY fd.maturity_date`,
-    [request.user.id]
+    [request.user.id, ...ff.params]
   )
   return rows.map((r) => ({
     ...r,
@@ -156,14 +158,15 @@ async function fdDelete(request, reply) {
 
 async function rdList(request, reply) {
   const db = request.server.db
+  const ff = familyFilter(request)
   const rows = await query(db,
     `SELECT a.id, a.asset_name, a.notes, a.family_member_id,
             rd.bank_name, rd.account_number, rd.monthly_amount, rd.interest_rate,
             rd.tenure_months, rd.start_date, rd.maturity_date, rd.maturity_amount
      FROM assets a JOIN recurring_deposits rd ON rd.asset_id = a.id
-     WHERE a.user_id = ? AND a.is_active = 1
+     WHERE a.user_id = ? AND a.is_active = 1${ff.sql}
      ORDER BY rd.maturity_date`,
-    [request.user.id]
+    [request.user.id, ...ff.params]
   )
   return rows.map((r) => ({
     ...r,
@@ -284,14 +287,15 @@ async function rdDelete(request, reply) {
 
 async function savingsList(request, reply) {
   const db = request.server.db
+  const ff = familyFilter(request)
   const rows = await query(db,
     `SELECT a.id, a.asset_name, a.notes, a.family_member_id, a.current_value,
             sa.bank_name, sa.account_number, sa.account_type, sa.ifsc_code,
             sa.branch_name, sa.interest_rate
      FROM assets a JOIN savings_accounts sa ON sa.asset_id = a.id
-     WHERE a.user_id = ? AND a.is_active = 1
+     WHERE a.user_id = ? AND a.is_active = 1${ff.sql}
      ORDER BY a.created_at DESC`,
-    [request.user.id]
+    [request.user.id, ...ff.params]
   )
   return rows.map((r) => ({
     ...r,

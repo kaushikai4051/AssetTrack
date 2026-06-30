@@ -1,4 +1,5 @@
 const { query, queryOne, insert } = require('../../models/db')
+const { familyFilter } = require('../../utils/familyFilter')
 
 function fmtDate(d) {
   if (!d) return null
@@ -34,6 +35,7 @@ function parseProperty(r) {
 
 async function propertyList(request, reply) {
   const db = request.server.db
+  const ff = familyFilter(request)
   const rows = await query(db,
     `SELECT a.id, a.asset_name, a.notes, a.family_member_id,
             p.property_type, p.property_name, p.address,
@@ -43,9 +45,9 @@ async function propertyList(request, reply) {
             p.ownership_percent, p.co_owner_name,
             p.units, p.buy_price_per_unit
      FROM assets a JOIN properties p ON p.asset_id = a.id
-     WHERE a.user_id = ? AND a.is_active = 1
+     WHERE a.user_id = ? AND a.is_active = 1${ff.sql}
      ORDER BY p.purchase_date DESC`,
-    [request.user.id]
+    [request.user.id, ...ff.params]
   )
   return rows.map(parseProperty)
 }

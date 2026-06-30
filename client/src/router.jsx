@@ -21,6 +21,7 @@ import Reports from '@/pages/Reports'
 import Settings from '@/pages/Settings'
 import Nominees from '@/pages/Nominees'
 import Documents from '@/pages/Documents'
+import Family from '@/pages/Family'
 import PlaceholderPage from '@/pages/PlaceholderPage'
 
 const router = createBrowserRouter([
@@ -50,7 +51,7 @@ const router = createBrowserRouter([
       { path: 'tax', element: <Tax /> },
       { path: 'analytics', element: <Analytics /> },
       { path: 'reports', element: <Reports /> },
-      { path: 'family', element: <PlaceholderPage title="Family" /> },
+      { path: 'family', element: <Family /> },
       { path: 'nominees', element: <Nominees /> },
       { path: 'documents', element: <Documents /> },
       { path: 'alerts', element: <Alerts /> },

@@ -10,6 +10,7 @@ import LoanForm from './LoanForm'
 import PrepaymentSimulator from './PrepaymentSimulator'
 import DocumentsPanel from '@/components/shared/DocumentsPanel'
 import { formatINR, formatCompact } from '@/utils/currency'
+import useFilterStore from '@/store/filterStore'
 import api from '@/services/api'
 
 const LOAN_TYPES = [
@@ -94,11 +95,15 @@ export default function Loans() {
   const [formModal, setFormModal]   = useState(null)
   const [simModal, setSimModal]     = useState(null)
   const [docsModal, setDocsModal]   = useState(null)
+  const activeMemberId = useFilterStore((s) => s.activeMemberId)
 
   const { data = [], isLoading } = useQuery({
-    queryKey: ['loans', activeType],
+    queryKey: ['loans', activeType, activeMemberId],
     queryFn: () => {
-      const params = activeType !== 'all' ? `?type=${activeType}` : ''
+      const qs = new URLSearchParams()
+      if (activeType !== 'all') qs.set('type', activeType)
+      if (activeMemberId !== null) qs.set('family_member_id', activeMemberId === 0 ? 'self' : activeMemberId)
+      const params = qs.toString() ? `?${qs}` : ''
       return api.get(`/assets/loans${params}`).then((r) => r.data)
     },
   })
